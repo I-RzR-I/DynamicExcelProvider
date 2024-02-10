@@ -11,12 +11,12 @@
     <NoWarn>$(NoWarn);CS8032</NoWarn>
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageTags></PackageTags>
+    <PackageTags>Export;CSV;XLSX;Excel;Generate</PackageTags>
     <RepositoryUrl>https://github.com/I-RzR-I/DynamicExcelProvider</RepositoryUrl>
     <PackageProjectUrl>https://github.com/I-RzR-I/DynamicExcelProvider</PackageProjectUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageDescription></PackageDescription>
-    <Summary></Summary>
+    <PackageDescription>Export data to Excel format in an easier mode and with dynamic results.</PackageDescription>
+    <Summary>Export data to Excel format in an easier mode and with dynamic results.</Summary>
     <PackageTitle>RzR.Shared.Export.DynamicExcelProvider</PackageTitle>
     <Title>RzR.Shared.Export.DynamicExcelProvider</Title>
     <LangVersion>9.0</LangVersion>
