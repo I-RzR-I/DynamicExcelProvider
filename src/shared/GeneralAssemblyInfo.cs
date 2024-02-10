@@ -31,7 +31,7 @@ using System.Resources;
 [assembly: AssemblyProduct("DynamicExcelProvider")]
 [assembly: AssemblyCopyright("Copyright © 2024 RzR All rights reserved.")]
 [assembly: AssemblyTrademark("® RzR™")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Export data to Excel format in an easier mode and with dynamic results.")]
 
 [assembly: AssemblyMetadata("TermsOfService", "")]
 
@@ -41,6 +41,6 @@ using System.Resources;
 
 [assembly: NeutralResourcesLanguage("en-US", UltimateResourceFallbackLocation.MainAssembly)]
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: AssemblyInformationalVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.5781")]
+[assembly: AssemblyFileVersion("1.0.1.5781")]
+[assembly: AssemblyInformationalVersion("1.0.1.5781")]
