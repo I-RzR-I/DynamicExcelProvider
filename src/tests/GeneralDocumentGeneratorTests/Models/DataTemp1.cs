@@ -36,10 +36,10 @@ namespace GeneralDocumentGeneratorTests.Models
 
         [ExcelPropName("Cod", 1048, true, 3)] public string Code { get; set; }
 
-        [ExcelPropName("DataInceput", 1048, true, 5)]
+        [ExcelPropName("Data Inceput", 1048, true, 5)]
         public DateTime StartDate { get; set; }
 
-        [ExcelPropName("DataSfarsit", 1048, true, 6)]
+        [ExcelPropName("Data Sfarsit", 1048, true, 6)]
         public DateTime? EndDate { get; set; }
 
         [ExcelPropName("DataOperatie", 1048, true, 2, "h/d/yy h:mm")]
