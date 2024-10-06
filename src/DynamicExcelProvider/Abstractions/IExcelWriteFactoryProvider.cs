@@ -200,5 +200,61 @@ namespace DynamicExcelProvider.Abstractions
         /// </returns>
         /// =================================================================================================
         Task<IResult> GenerateAsync(Stream stream, WorkbookDefinition workBook, CancellationToken cancellationToken = default);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates a template.
+        /// </summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="lcid">The lcid.</param>
+        /// <returns>
+        ///     The template.
+        /// </returns>
+        /// =================================================================================================
+        IResult<byte[]> GenerateTemplate<T>(int lcid) where T : class;
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates a template.
+        /// </summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="stream">The stream.</param>
+        /// <param name="lcid">The lcid.</param>
+        /// <returns>
+        ///     The template.
+        /// </returns>
+        /// =================================================================================================
+        IResult GenerateTemplate<T>(MemoryStream stream, int lcid) where T : class;
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates a template asynchronous.
+        /// </summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="lcid">The lcid.</param>
+        /// <param name="cancellationToken">
+        ///     (Optional) A token that allows processing to be cancelled.
+        /// </param>
+        /// <returns>
+        ///     The template asynchronous.
+        /// </returns>
+        /// =================================================================================================
+        Task<IResult<byte[]>> GenerateTemplateAsync<T>(int lcid, CancellationToken cancellationToken = default) where T : class;
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates a template asynchronous.
+        /// </summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="stream">The stream.</param>
+        /// <param name="lcid">The lcid.</param>
+        /// <param name="cancellationToken">
+        ///     (Optional) A token that allows processing to be cancelled.
+        /// </param>
+        /// <returns>
+        ///     The template asynchronous.
+        /// </returns>
+        /// =================================================================================================
+        Task<IResult> GenerateTemplateAsync<T>(MemoryStream stream, int lcid, CancellationToken cancellationToken = default) where T : class;
     }
 }

@@ -93,6 +93,15 @@ namespace DynamicExcelProvider.Attributes
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
+        ///     Initializes a new instance of the <see cref="ExcelPropNameAttribute"/> class.
+        /// </summary>
+        /// =================================================================================================
+        public ExcelPropNameAttribute()
+        {
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
         ///     Gets or sets the localized property name.
         /// </summary>
         /// <value>
@@ -109,7 +118,7 @@ namespace DynamicExcelProvider.Attributes
         ///     Information describing the culture.
         /// </value>
         /// =================================================================================================
-        public CultureInfo CultureInfo { get; }
+        public CultureInfo CultureInfo { get; set; }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -129,7 +138,7 @@ namespace DynamicExcelProvider.Attributes
         ///     <see langword="true" /> if include it; otherwise, <see langword="false" />.
         /// </value>
         /// =================================================================================================
-        public bool InResult { get; set; }
+        public bool InResult { get; set; } = false;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>

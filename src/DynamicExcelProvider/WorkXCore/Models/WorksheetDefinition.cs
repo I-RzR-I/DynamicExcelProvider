@@ -16,6 +16,7 @@
 
 #region U S A G E S
 
+using DocumentFormat.OpenXml.Spreadsheet;
 using System.Collections.Generic;
 
 #endregion
@@ -97,5 +98,15 @@ namespace DynamicExcelProvider.WorkXCore.Models
         /// </value>
         /// =================================================================================================
         public IEnumerable<RowDefinition> Rows { get; set; }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Gets or sets the sheet validations.
+        /// </summary>
+        /// <value>
+        ///     The sheet validations.
+        /// </value>
+        /// =================================================================================================
+        public DataValidations SheetValidations { get; set; }
     }
 }
