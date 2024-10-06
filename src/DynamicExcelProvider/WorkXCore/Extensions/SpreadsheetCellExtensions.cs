@@ -89,7 +89,7 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
             }
             catch (Exception e)
             {
-                return Result<Cell>.Failure().WithError(e);
+                return Result<Cell>.Failure(e.Message).WithError(e);
             }
         }
     }

@@ -75,7 +75,7 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
             }
             catch (Exception e)
             {
-                return Result.Failure().WithError(e);
+                return Result.Failure(e.Message).WithError(e);
             }
         }
 
@@ -141,7 +141,7 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
             }
             catch (Exception e)
             {
-                return Result.Failure().WithError(e);
+                return Result.Failure(e.Message).WithError(e);
             }
         }
     }

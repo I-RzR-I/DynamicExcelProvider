@@ -95,11 +95,12 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
         /// </summary>
         /// <param name="stream">The stream.</param>
         /// <param name="workBook">The work book.</param>
+        /// <param name="appendSheetValidations">(Optional) True to append sheet validations.</param>
         /// <returns>
         ///     An IResult.
         /// </returns>
         /// =================================================================================================
-        public IResult Write(Stream stream, WorkbookDefinition workBook)
+        public IResult Write(Stream stream, WorkbookDefinition workBook, bool appendSheetValidations = false)
         {
             try
             {
@@ -144,6 +145,9 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
                             if (sheet.IsSuccess.IsFalse()) return Result.Failure(sheet.GetFirstMessage());
 
                             sheets?.Append(sheet.Response);
+                            
+                            if (worksheet.item.SheetValidations.IsNullOrEmptyEnumerable().IsFalse() && appendSheetValidations.IsTrue())
+                                worksheetPart.Worksheet.AppendChild(worksheet.item.SheetValidations);
                         }
 
                         SpreadsheetCellFormatHelper.DisposeObjects();
@@ -154,7 +158,7 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
             }
             catch (Exception e)
             {
-                return Result.Failure().WithError(e);
+                return Result.Failure(e.Message).WithError(e);
             }
         }
 

@@ -72,7 +72,7 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
             }
             catch (Exception e)
             {
-                return Result<Row>.Failure().WithError(e);
+                return Result<Row>.Failure(e.Message).WithError(e);
             }
         }
     }

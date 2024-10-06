@@ -85,7 +85,7 @@ namespace DynamicExcelProvider.WorkXCore.Models
         ///     The header vertical aligns.
         /// </summary>
         /// <value>
-        ///     The header vvertical aligns.
+        ///     The header vertical aligns.
         /// </value>
         /// =================================================================================================
         internal Dictionary<VerticalCellAlignment, bool> HeaderVAligns { get; set; } = new();

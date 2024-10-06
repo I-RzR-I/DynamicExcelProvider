@@ -34,7 +34,8 @@ namespace GeneralDocumentGeneratorTests.Models
         [ExcelPropName("Nume", 1048, true, 34)]
         public string Name { get; set; }
 
-        [ExcelPropName("Cod", 1048, true, 3)] public string Code { get; set; }
+        [ExcelPropName("Cod", 1048, true, 3)] 
+        public string Code { get; set; }
 
         [ExcelPropName("DataInceput", 1048, true, 5)]
         public DateTime StartDate { get; set; }

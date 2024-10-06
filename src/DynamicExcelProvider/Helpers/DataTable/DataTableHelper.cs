@@ -89,7 +89,8 @@ namespace DynamicExcelProvider.Helpers.DataTable
             foreach (var col in _availablePropInOutput.OrderBy(x => x.Order))
             {
                 var columnInfo = _generalTableData.FirstOrDefault(x => x.CommonName == col.CommonName);
-                if (columnInfo != null) table.Columns.Add(col.TranslateName, DataTypeHelper.GetColumnType(columnInfo.DataType, columnInfo.IsNullable));
+                if (columnInfo.IsNotNull()) 
+                    table.Columns.Add(col.TranslateName, DataTypeHelper.GetColumnType(columnInfo!.DataType, columnInfo.IsNullable));
             }
 
             return table;
@@ -109,9 +110,9 @@ namespace DynamicExcelProvider.Helpers.DataTable
             foreach (var item in _availablePropInOutput.OrderBy(x => x.Order))
             {
                 var columnInfo = _generalTableData.FirstOrDefault(x => x.CommonName == item.CommonName);
-                if (columnInfo == null) continue;
+                if (columnInfo.IsNull()) continue;
                 {
-                    var dataType = DataTypeHelper.GetColumnType(columnInfo.DataType, columnInfo.IsNullable);
+                    var dataType = DataTypeHelper.GetColumnType(columnInfo!.DataType, columnInfo.IsNullable);
                     var data = record.FirstOrDefault(x => x.Name == item.TranslateName)?.Value;
                     var convertedData = Convert.ChangeType(data, dataType);
                     row[idx] = convertedData;
@@ -139,13 +140,13 @@ namespace DynamicExcelProvider.Helpers.DataTable
             {
                 var columnInfo = _generalTableData.FirstOrDefault(x => x.CommonName == item.CommonName);
 
-                if (columnInfo == null) continue;
-                var dataType = DataTypeHelper.GetColumnType(columnInfo.DataType, columnInfo.IsNullable);
+                if (columnInfo.IsNull()) continue;
+                var dataType = DataTypeHelper.GetColumnType(columnInfo!.DataType, columnInfo.IsNullable);
                 var dataProp = recordProps.FirstOrDefault(x => x.Name == item.TranslateName);
 
-                if (dataProp == null) continue;
+                if (dataProp.IsNull()) continue;
                 {
-                    var propValue = dataProp.GetGetMethod(true).Invoke(record, new object[] { });
+                    var propValue = dataProp!.GetGetMethod(true).Invoke(record, new object[] { });
 
                     var convertedData = Convert.ChangeType(propValue, dataType);
                     row[idx] = convertedData;
@@ -173,13 +174,13 @@ namespace DynamicExcelProvider.Helpers.DataTable
             {
                 var columnInfo = _generalTableData.FirstOrDefault(x => x.CommonName == item.CommonName);
 
-                if (columnInfo == null) continue;
-                var dataType = DataTypeHelper.GetColumnType(columnInfo.DataType, columnInfo.IsNullable);
+                if (columnInfo.IsNull()) continue;
+                var dataType = DataTypeHelper.GetColumnType(columnInfo!.DataType, columnInfo.IsNullable);
                 var dataProp = recordProps.FirstOrDefault(x => x.Name == item.CommonName);
 
-                if (dataProp == null) continue;
+                if (dataProp.IsNull()) continue;
                 {
-                    var propValue = dataProp.GetGetMethod(true).Invoke(record, new object[] { });
+                    var propValue = dataProp!.GetGetMethod(true).Invoke(record, new object[] { });
 
                     var convertedData = Convert.ChangeType(propValue, dataType);
                     row[idx] = convertedData;
@@ -206,14 +207,14 @@ namespace DynamicExcelProvider.Helpers.DataTable
             {
                 var columnInfo = _generalTableData.FirstOrDefault(x => x.CommonName == item.CommonName);
 
-                if (columnInfo == null) continue;
-                var dataType = DataTypeHelper.GetColumnType(columnInfo.DataType, columnInfo.IsNullable);
+                if (columnInfo.IsNull()) continue;
+                var dataType = DataTypeHelper.GetColumnType(columnInfo!.DataType, columnInfo.IsNullable);
                 var propertyInfos = recordProps.ToList();
                 var dataProp = propertyInfos.FirstOrDefault(x => x.Name == item.CommonName);
 
-                if (dataProp == null) continue;
+                if (dataProp.IsNull()) continue;
                 {
-                    var propValue = dataProp.GetGetMethod(true).Invoke(record, new object[] { });
+                    var propValue = dataProp!.GetGetMethod(true).Invoke(record, new object[] { });
 
                     var convertedData = Convert.ChangeType(propValue, dataType);
                     row[idx] = convertedData;

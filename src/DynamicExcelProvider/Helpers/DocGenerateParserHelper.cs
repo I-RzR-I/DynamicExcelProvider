@@ -21,6 +21,7 @@ using AggregatedGenericResultMessage.Abstractions;
 using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.Extensions;
 using DynamicExcelProvider.Helpers.DataTable;
+using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Export;
 using DynamicExcelProvider.WorkXCore.Helpers;
@@ -39,8 +40,6 @@ namespace DynamicExcelProvider.Helpers
     /// <summary>
     ///     A document generate parser helper.
     /// </summary>
-    /// <remarks>
-    /// </remarks>
     /// =================================================================================================
     internal static class DocGenerateParserHelper
     {
@@ -48,8 +47,6 @@ namespace DynamicExcelProvider.Helpers
         /// <summary>
         ///     Generates an excel file bytes.
         /// </summary>
-        /// <remarks>
-        /// </remarks>
         /// <param name="embeddedModelCollection">Collection of embedded models.</param>
         /// <param name="availablePropInOutput">The available property in output.</param>
         /// <param name="data">The data.</param>
@@ -72,8 +69,6 @@ namespace DynamicExcelProvider.Helpers
         /// <summary>
         ///     Generates an excel file bytes.
         /// </summary>
-        /// <remarks>
-        /// </remarks>
         /// <typeparam name="TDataModel">Type of the data model.</typeparam>
         /// <param name="embeddedModelCollection">Collection of embedded models.</param>
         /// <param name="availablePropInOutput">The available property in output.</param>
@@ -98,8 +93,6 @@ namespace DynamicExcelProvider.Helpers
         /// <summary>
         ///     Generates an excel file bytes.
         /// </summary>
-        /// <remarks>
-        /// </remarks>
         /// <typeparam name="TResult">Type of the result.</typeparam>
         /// <param name="data">The data.</param>
         /// <param name="cultureId">(Optional) Identifier for the culture.</param>
@@ -108,7 +101,7 @@ namespace DynamicExcelProvider.Helpers
         ///     An IResult.
         /// </returns>
         /// =================================================================================================
-        internal static IResult<byte[]> Generate<TResult>(IReadOnlyCollection<TResult> data, int cultureId = 1033, 
+        internal static IResult<byte[]> Generate<TResult>(IReadOnlyCollection<TResult> data, int cultureId = 1033,
             string sheetName = "Sheet1")
         {
             var infoDataModel = WorkbookParseBuildHelper.BuildAndParseInternalModel(data.FirstOrDefault(), cultureId);
@@ -118,23 +111,26 @@ namespace DynamicExcelProvider.Helpers
             var (outputProps, embeddedModelCollection) = infoDataModel.Response;
 
             var ms = new MemoryStream();
-            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(sheetName, outputProps, embeddedModelCollection, data, false);
+            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(
+                sheetName, 
+                outputProps,
+                embeddedModelCollection,
+                data, 
+                false);
             if (wbDef.IsSuccess.IsFalse())
                 return Result<byte[]>.Failure(wbDef.GetFirstMessage());
 
             var document = SpreadsheetDocumentHelper.Instance.Write(ms, wbDef.Response);
-            if (document.IsSuccess.IsFalse())
-                return Result<byte[]>.Failure(document.Messages.FirstOrDefault()?.Message);
-
-            return Result<byte[]>.Success(ms.ToArray());
+            
+            return document.IsSuccess.IsFalse() 
+                ? Result<byte[]>.Failure(document.Messages.FirstOrDefault()?.Message) 
+                : Result<byte[]>.Success(ms.ToArray());
         }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
         ///     Generates an excel file.
         /// </summary>
-        /// <remarks>
-        /// </remarks>
         /// <typeparam name="TResult">Type of the result.</typeparam>
         /// <param name="stream">The stream.</param>
         /// <param name="data">The data.</param>
@@ -144,7 +140,7 @@ namespace DynamicExcelProvider.Helpers
         ///     An IResult.
         /// </returns>
         /// =================================================================================================
-        internal static IResult Generate<TResult>(Stream stream, IReadOnlyCollection<TResult> data, int cultureId = 1033, 
+        internal static IResult Generate<TResult>(Stream stream, IReadOnlyCollection<TResult> data, int cultureId = 1033,
             string sheetName = "Sheet1")
         {
             var infoDataModel = WorkbookParseBuildHelper.BuildAndParseInternalModel(data.FirstOrDefault(), cultureId);
@@ -153,23 +149,26 @@ namespace DynamicExcelProvider.Helpers
 
             var (outputProps, embeddedModelCollection) = infoDataModel.Response;
 
-            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(sheetName, outputProps, embeddedModelCollection, data, false);
+            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(
+                sheetName, 
+                outputProps, 
+                embeddedModelCollection, 
+                data, 
+                false);
             if (wbDef.IsSuccess.IsFalse())
                 return Result.Failure(wbDef.GetFirstMessage());
 
             var document = SpreadsheetDocumentHelper.Instance.Write(stream, wbDef.Response);
-            if (document.IsSuccess.IsFalse())
-                return Result.Failure(document.Messages.FirstOrDefault()?.Message);
-
-            return Result.Success();
+            
+            return document.IsSuccess.IsFalse() 
+                ? Result.Failure(document.Messages.FirstOrDefault()?.Message) 
+                : Result.Success();
         }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
         ///     Generates an excel file.
         /// </summary>
-        /// <remarks>
-        /// </remarks>
         /// <param name="exportConfiguration">The export configuration.</param>
         /// <returns>
         ///     An IResult.
@@ -177,8 +176,10 @@ namespace DynamicExcelProvider.Helpers
         /// =================================================================================================
         internal static IResult<byte[]> Generate(ExcelCollectionExportConfiguration exportConfiguration)
         {
-            var infoDataModel = (IResult<(List<PropTranslateModel>, List<PropModel>)>)WorkbookParseBuildHelper.BuildAndParseInternalModelDynamic(
-                exportConfiguration.Configuration, exportConfiguration.DataCollection.FirstOrDefault());
+            var infoDataModel = (IResult<(List<PropTranslateModel>, List<PropModel>)>)WorkbookParseBuildHelper
+                .BuildAndParseInternalModelDynamic(
+                exportConfiguration.Configuration, 
+                exportConfiguration.DataCollection.FirstOrDefault());
             if (infoDataModel.IsSuccess.IsFalse())
                 return Result<byte[]>.Failure(infoDataModel.GetFirstMessage());
 
@@ -186,25 +187,26 @@ namespace DynamicExcelProvider.Helpers
 
             var ms = new MemoryStream();
 
-            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(exportConfiguration.Configuration.SheetName, outputProps,
-                embeddedModelCollection, exportConfiguration.DataCollection, true);
+            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(
+                exportConfiguration.Configuration.SheetName, 
+                outputProps,
+                embeddedModelCollection, 
+                exportConfiguration.DataCollection, 
+                true);
             if (wbDef.IsSuccess.IsFalse())
                 return Result<byte[]>.Failure(wbDef.GetFirstMessage());
 
             var document = SpreadsheetDocumentHelper.Instance.Write(ms, wbDef.Response);
 
-            if (document.IsSuccess.IsFalse())
-                return Result<byte[]>.Failure(document.Messages.FirstOrDefault()?.Message);
-
-            return Result<byte[]>.Success(ms.ToArray());
+            return document.IsSuccess.IsFalse() 
+                ? Result<byte[]>.Failure(document.Messages.FirstOrDefault()?.Message) 
+                : Result<byte[]>.Success(ms.ToArray());
         }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
         ///     Generates an excel file.
         /// </summary>
-        /// <remarks>
-        /// </remarks>
         /// <param name="stream">The stream.</param>
         /// <param name="exportConfiguration">The export configuration.</param>
         /// <returns>
@@ -213,24 +215,114 @@ namespace DynamicExcelProvider.Helpers
         /// =================================================================================================
         internal static IResult Generate(Stream stream, ExcelCollectionExportConfiguration exportConfiguration)
         {
-            var infoDataModel = (IResult<(List<PropTranslateModel>, List<PropModel>)>)WorkbookParseBuildHelper.BuildAndParseInternalModelDynamic(
-                exportConfiguration.Configuration, exportConfiguration.DataCollection.FirstOrDefault());
+            var infoDataModel = (IResult<(List<PropTranslateModel>, List<PropModel>)>)WorkbookParseBuildHelper
+                .BuildAndParseInternalModelDynamic(
+                exportConfiguration.Configuration, 
+                exportConfiguration.DataCollection.FirstOrDefault());
             if (infoDataModel.IsSuccess.IsFalse())
                 return Result.Failure(infoDataModel.GetFirstMessage());
 
             var (outputProps, embeddedModelCollection) = infoDataModel.Response;
 
-            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(exportConfiguration.Configuration.SheetName, outputProps,
-                embeddedModelCollection, exportConfiguration.DataCollection, true);
+            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(
+                exportConfiguration.Configuration.SheetName, 
+                outputProps,
+                embeddedModelCollection, 
+                exportConfiguration.DataCollection,
+                true);
             if (wbDef.IsSuccess.IsFalse())
                 return Result.Failure(wbDef.GetFirstMessage());
 
             var document = SpreadsheetDocumentHelper.Instance.Write(stream, wbDef.Response);
 
-            if (document.IsSuccess.IsFalse())
-                return Result.Failure(document.Messages.FirstOrDefault()?.Message);
+            return document.IsSuccess.IsFalse() 
+                ? Result.Failure(document.Messages.FirstOrDefault()?.Message) 
+                : Result.Success();
+        }
 
-            return Result.Success();
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates a template.
+        /// </summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="lcid">The lcid.</param>
+        /// <returns>
+        ///     The template.
+        /// </returns>
+        /// =================================================================================================
+        internal static IResult<byte[]> GenerateTemplate<T>(int lcid) where T : class
+        {
+            const string sheetName = "Sheet1";
+            var infoDataModel = WorkbookParseBuildHelper.BuildAndParseInternalModelDynamic(
+                new ExcelWriteConfiguration(sheetName, lcid), null, typeof(T));
+            if (infoDataModel.IsSuccess.IsFalse())
+                return Result<byte[]>.Failure(infoDataModel.GetFirstMessage());
+
+            var (outputProps, embeddedModelCollection) = infoDataModel.Response;
+
+            var ms = new MemoryStream();
+
+            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(
+                sheetName: sheetName, 
+                outputProps: outputProps,
+                embeddedModelCollection: embeddedModelCollection,
+                data: new List<T>(), 
+                isDynamic: true, 
+                sourceRowType: typeof(T), 
+                generateSheetValidations: true);
+            if (wbDef.IsSuccess.IsFalse())
+                return Result<byte[]>.Failure(wbDef.GetFirstMessage());
+
+            var document = SpreadsheetDocumentHelper.Instance.Write(
+                stream: ms, 
+                workBook: wbDef.Response, 
+                appendSheetValidations: true);
+
+            return document.IsSuccess.IsFalse() 
+                ? Result<byte[]>.Failure(document.Messages.FirstOrDefault()?.Message) 
+                : Result<byte[]>.Success(ms.ToArray());
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates a template.
+        /// </summary>
+        /// <typeparam name="T">Generic type parameter.</typeparam>
+        /// <param name="stream">The stream.</param>
+        /// <param name="lcid">The lcid.</param>
+        /// <returns>
+        ///     The template.
+        /// </returns>
+        /// =================================================================================================
+        internal static IResult GenerateTemplate<T>(MemoryStream stream, int lcid) where T : class
+        {
+            const string sheetName = "Sheet1";
+            var infoDataModel = WorkbookParseBuildHelper.BuildAndParseInternalModelDynamic(
+                new ExcelWriteConfiguration(sheetName, lcid), null, typeof(T));
+            if (infoDataModel.IsSuccess.IsFalse())
+                return Result.Failure(infoDataModel.GetFirstMessage());
+
+            var (outputProps, embeddedModelCollection) = infoDataModel.Response;
+
+            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(
+                sheetName: sheetName,
+                outputProps: outputProps,
+                embeddedModelCollection: embeddedModelCollection,
+                data: new List<T>(),
+                isDynamic: true,
+                sourceRowType: typeof(T),
+                generateSheetValidations: true);
+            if (wbDef.IsSuccess.IsFalse())
+                return Result.Failure(wbDef.GetFirstMessage());
+
+            var document = SpreadsheetDocumentHelper.Instance.Write(
+                stream: stream, 
+                workBook: wbDef.Response, 
+                appendSheetValidations: true);
+
+            return document.IsSuccess.IsFalse()
+                ? Result.Failure(document.Messages.FirstOrDefault()?.Message)
+                : Result.Success();
         }
     }
 }

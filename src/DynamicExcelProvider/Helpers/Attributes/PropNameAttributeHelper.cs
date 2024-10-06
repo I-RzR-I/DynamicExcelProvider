@@ -31,7 +31,7 @@ using System.Linq;
 
 #endregion
 
-namespace DynamicExcelProvider.Helpers
+namespace DynamicExcelProvider.Helpers.Attributes
 {
     /// -------------------------------------------------------------------------------------------------
     /// <summary>

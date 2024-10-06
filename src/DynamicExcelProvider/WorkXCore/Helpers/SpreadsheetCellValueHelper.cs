@@ -73,7 +73,7 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
             }
             catch (Exception e)
             {
-                return Result<CellValue>.Failure().WithError(e);
+                return Result<CellValue>.Failure(e.Message).WithError(e);
             }
         }
 
@@ -105,7 +105,7 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
             }
             catch (Exception e)
             {
-                return Result<CellValue>.Failure().WithError(e);
+                return Result<CellValue>.Failure(e.Message).WithError(e);
             }
         }
     }

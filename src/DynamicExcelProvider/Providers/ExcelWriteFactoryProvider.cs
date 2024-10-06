@@ -89,7 +89,7 @@ namespace DynamicExcelProvider.Providers
         {
             try
             {
-                var byteData = await Task.Run(() => DocGenerateParserHelper.Generate(embeddedModelCollection, 
+                var byteData = await Task.Run(() => DocGenerateParserHelper.Generate(embeddedModelCollection,
                     availablePropInOutput, data), cancellationToken);
 
                 return byteData;
@@ -128,7 +128,7 @@ namespace DynamicExcelProvider.Providers
             => await Task.Run(() => DocGenerateParserHelper.Generate(stream, data, cultureId), cancellationToken);
 
         /// <inheritdoc />
-        public async Task<IResult<byte[]>> GenerateAsync(ExcelCollectionExportConfiguration request, 
+        public async Task<IResult<byte[]>> GenerateAsync(ExcelCollectionExportConfiguration request,
             CancellationToken cancellationToken = default)
         {
             try
@@ -146,7 +146,7 @@ namespace DynamicExcelProvider.Providers
         }
 
         /// <inheritdoc />
-        public async Task<IResult> GenerateAsync(Stream stream, ExcelCollectionExportConfiguration request, 
+        public async Task<IResult> GenerateAsync(Stream stream, ExcelCollectionExportConfiguration request,
             CancellationToken cancellationToken = default)
             => await Task.Run(() => DocGenerateParserHelper.Generate(stream, request), cancellationToken);
 
@@ -155,7 +155,7 @@ namespace DynamicExcelProvider.Providers
             => _spreadsheetDocumentService.WriteFile(filePath, workBook);
 
         /// <inheritdoc />
-        public async Task<IResult> GenerateAsync(string filePath, WorkbookDefinition workBook, 
+        public async Task<IResult> GenerateAsync(string filePath, WorkbookDefinition workBook,
             CancellationToken cancellationToken = default)
             => await _spreadsheetDocumentService.WriteFileAsync(filePath, workBook, cancellationToken);
 
@@ -168,5 +168,23 @@ namespace DynamicExcelProvider.Providers
             Stream stream, WorkbookDefinition workBook,
             CancellationToken cancellationToken = default)
             => await _spreadsheetDocumentService.WriteFileAsync(stream, workBook, cancellationToken);
+
+        /// <inheritdoc />
+        public IResult<byte[]> GenerateTemplate<T>(int lcid) where T : class
+            => DocGenerateParserHelper.GenerateTemplate<T>(lcid);
+
+        /// <inheritdoc />
+        public IResult GenerateTemplate<T>(MemoryStream stream, int lcid) where T : class
+            => DocGenerateParserHelper.GenerateTemplate<T>(stream, lcid);
+
+        /// <inheritdoc />
+        public async Task<IResult<byte[]>> GenerateTemplateAsync<T>(int lcid, 
+            CancellationToken cancellationToken = default) where T : class
+            => await Task.Run(() => GenerateTemplate<T>(lcid), cancellationToken);
+
+        /// <inheritdoc />
+        public async Task<IResult> GenerateTemplateAsync<T>(MemoryStream stream, int lcid, 
+            CancellationToken cancellationToken = default) where T : class
+            => await Task.Run(() => GenerateTemplate<T>(stream, lcid), cancellationToken);
     }
 }
