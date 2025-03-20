@@ -2,7 +2,7 @@
   <Settings>
     <AllowParallelTestExecution>True</AllowParallelTestExecution>
     <HotSpotsLineExclusionList>
-      <Value>WorkXCore\Extensions\SpreadsheetCellExtensions.cs:DynamicExcelProvider\DynamicExcelProvider.csproj-91</Value>
+      <Value>WorkXCore\Extensions\SpreadsheetCellExtensions.cs:DynamicExcelProvider\DynamicExcelProvider.csproj-92</Value>
     </HotSpotsLineExclusionList>
     <SolutionConfigured>True</SolutionConfigured>
   </Settings>

@@ -48,8 +48,8 @@ namespace DynamicExcelProvider.Attributes
             ValidationType = validationType;
             OperatorType = operatorType;
             AllowedValues = allowedValues;
-            MinValue = (int?)minValue;
-            MaxValue = (int?)maxValue;
+            MinValue = minValue;
+            MaxValue = maxValue;
             ErrorMessage = errorMessage;
             PromptMessage = promptMessage;
             AllowEmpty = allowEmpty;
@@ -89,8 +89,8 @@ namespace DynamicExcelProvider.Attributes
         {
             ValidationType = validationType;
             OperatorType = operatorType;
-            MinValue = (int?)minValue;
-            MaxValue = (int?)maxValue;
+            MinValue = minValue;
+            MaxValue = maxValue;
             ErrorMessage = errorMessage;
             PromptMessage = promptMessage;
             AllowEmpty = allowEmpty;
@@ -107,7 +107,7 @@ namespace DynamicExcelProvider.Attributes
         {
             ValidationType = validationType;
             OperatorType = operatorType;
-            MinValue = (int?)minValue;
+            MinValue = minValue;
             ErrorMessage = errorMessage;
             PromptMessage = promptMessage;
             AllowEmpty = allowEmpty;
