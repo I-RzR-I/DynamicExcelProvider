@@ -91,5 +91,33 @@ namespace GeneralDocumentGeneratorTests
             Assert.IsNotNull(fs);
             Assert.IsNotNull(fs.Length > 0);
         }
+
+        [DataRow(1048)]
+        [DataRow(1033)]
+        [TestMethod]
+        public void Generator_xlsx_Empty_Template_Stream_PublicSet_CustomFields_Test(int lcid)
+        {
+            var ms = new MemoryStream();
+            var bytesArray = DocGenerateParserHelper.GenerateTemplate<GenerateDataTemp>(
+                ms, lcid, new[]
+                {
+                    nameof(GenerateDataTemp.Id),
+                    nameof(GenerateDataTemp.OperationId),
+                    nameof(GenerateDataTemp.Name)
+                });
+
+            if (bytesArray.IsSuccess.IsFalse())
+                throw new Exception(bytesArray.GetFirstMessage());
+
+            Assert.IsTrue(bytesArray.IsSuccess);
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(),
+                $"G_xlsx_Empty_T_Stream_PublicSet_CustomFields_{lcid}_{Guid.NewGuid():N}.xlsx");
+            using var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            fs.Write(ms.ToArray());
+
+            Assert.IsNotNull(fs);
+            Assert.IsNotNull(fs.Length > 0);
+        }
     }
 }

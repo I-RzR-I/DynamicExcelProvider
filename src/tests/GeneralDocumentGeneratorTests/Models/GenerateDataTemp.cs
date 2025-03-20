@@ -46,7 +46,7 @@ namespace GeneralDocumentGeneratorTests.Models
         [ExcelPropName("Nume", 1048, true, 3)]
         public string Name { get; set; }
 
-        [ExcelPropValidation(ValidationType.TextLength, ValidationOperatorType.LessThan, minValue: 5, promptMessage: "Code, max length 5", errorMessage: "Maximum length!!")]
+        [ExcelPropValidation(ValidationType.TextLength, ValidationOperatorType.LessThan, minValue: 5, promptMessage: "Code, length < 5", errorMessage: "Maximum length!!")]
         [ExcelPropName("Cod", 1048, true, 4)]
         public string Code { get; set; }
 

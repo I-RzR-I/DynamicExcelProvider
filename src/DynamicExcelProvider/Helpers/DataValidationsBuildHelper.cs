@@ -55,7 +55,9 @@ namespace DynamicExcelProvider.Helpers
         ///     The DataValidations.
         /// </returns>
         /// =================================================================================================
-        internal static DataValidations BuildSheetDataValidations(ref IEnumerable<PropertyInfo> properties, ref IReadOnlyCollection<PropTranslateModel> outputProps)
+        internal static DataValidations BuildSheetDataValidations(
+            ref IEnumerable<PropertyInfo> properties, 
+            ref IReadOnlyCollection<PropTranslateModel> outputProps)
         {
             try
             {
