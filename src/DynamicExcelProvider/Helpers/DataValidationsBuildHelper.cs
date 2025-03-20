@@ -26,13 +26,15 @@ using DynamicExcelProvider.Enums;
 using DynamicExcelProvider.Mapper;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.WorkXCore.Extensions;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-#endregion
-
 // ReSharper disable PossibleMultipleEnumeration
+
+#endregion
 
 namespace DynamicExcelProvider.Helpers
 {
@@ -93,10 +95,26 @@ namespace DynamicExcelProvider.Helpers
                         }
 
                         if (validationAttribute.MinValue.IsNull().IsFalse())
-                            dataValidation.Formula1 = new Formula1($"{validationAttribute.MinValue}");
+                        {
+                            if (validationAttribute.ValidationType == ValidationType.Date)
+                            {
+                                var parseDate = Convert.ToDateTime(validationAttribute.MinValue);
+                                dataValidation.Formula1 = new Formula1($"DATE({parseDate.Year},{parseDate.Month},{parseDate.Day})");
+                            }
+                            else
+                                dataValidation.Formula1 = new Formula1($"{validationAttribute.MinValue}");
+                        }
 
                         if (validationAttribute.MaxValue.IsNull().IsFalse())
-                            dataValidation.Formula2 = new Formula2($"{validationAttribute.MaxValue}");
+                        {
+                            if (validationAttribute.ValidationType == ValidationType.Date)
+                            {
+                                var parseDate = Convert.ToDateTime(validationAttribute.MaxValue);
+                                dataValidation.Formula2 = new Formula2($"DATE({parseDate.Year},{parseDate.Month},{parseDate.Day})");
+                            }
+                            else 
+                                dataValidation.Formula2 = new Formula2($"{validationAttribute.MaxValue}");
+                        }
 
                         if (validationAttribute.AllowedValues.IsNullOrEmptyEnumerable().IsFalse())
                             dataValidation.Formula1 = new Formula1($"\"{validationAttribute.AllowedValues.ListToString(",")}\"");
@@ -110,8 +128,14 @@ namespace DynamicExcelProvider.Helpers
 
                 return dataValidations;
             }
-            catch
+#if DEBUG
+            catch (Exception ex)
             {
+                Debug.WriteLine(ex);
+#else
+            catch (Exception ex)
+            {
+#endif
                 return null;
             }
         }
