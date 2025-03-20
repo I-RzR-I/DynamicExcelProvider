@@ -18,6 +18,8 @@
 
 using DocumentFormat.OpenXml.Spreadsheet;
 
+// ReSharper disable ArrangeObjectCreationWhenTypeEvident
+
 #endregion
 
 namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style

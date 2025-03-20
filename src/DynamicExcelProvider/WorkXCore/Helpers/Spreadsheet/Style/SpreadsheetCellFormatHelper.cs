@@ -221,27 +221,19 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
                 if (sourceCellDataType == SourceCellDataType.Int
                     || sourceCellDataType == SourceCellDataType.Short
                     || sourceCellDataType == SourceCellDataType.Long)
-                    return CellDataDefinition.NumberFormats.ContainsKey(formatCode).IsFalse()
-                        ? 1
-                        : (uint)CellDataDefinition.NumberFormats[formatCode];
+                    return GetFormatCode(CellDataDefinition.NumberFormats, 1, formatCode);
 
                 if (sourceCellDataType == SourceCellDataType.Decimal
                     || sourceCellDataType == SourceCellDataType.Float)
-                    return CellDataDefinition.NumberFormats.ContainsKey(formatCode).IsFalse()
-                        ? 2
-                        : (uint)CellDataDefinition.NumberFormats[formatCode];
+                    return GetFormatCode(CellDataDefinition.NumberFormats, 2, formatCode);
 
-                return CellDataDefinition.NumberFormats.ContainsKey(formatCode).IsFalse()
-                    ? 1
-                    : (uint)CellDataDefinition.NumberFormats[formatCode];
+                return GetFormatCode(CellDataDefinition.NumberFormats, 1, formatCode);
             }
 
             if (cellDataType == CellDataType.Date)
-                return CellDataDefinition.DateFormats.ContainsKey(formatCode).IsFalse()
-                    ? 14
-                    : (uint)CellDataDefinition.DateFormats[formatCode];
+                return GetFormatCode(CellDataDefinition.DateFormats, 14, formatCode);
 
-            return (uint)CellDataDefinition.StandardFormats[formatCode];
+            return GetFormatCode(CellDataDefinition.StandardFormats, 0, formatCode); //GetFormatCode1(formatCode);
         }
 
         /// -------------------------------------------------------------------------------------------------
@@ -293,7 +285,7 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
 
                                         var key = BuildFormatCellBodyKey(wrapTextIdx, verticalAlign.Key.ToInt(),
                                             horizontalAlign.Key.ToInt(), isBoldIdx, isItalicIdx,
-                                            CellDataDefinition.StandardFormats[formatCode.Key],
+                                            (int)GetFormatCode(CellDataDefinition.StandardFormats,0, formatCode.Key),
                                             cellDataType.Key.ToInt(), sourceCellDataTypeValue.Key.ToInt(), fillId);
 
                                         CellFormatCodes.Add(key, startIdx);
@@ -347,6 +339,28 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
                         }
                 }
             }
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Gets format code.
+        /// </summary>
+        /// <param name="dictionary">The dictionary.</param>
+        /// <param name="defaultFormatIdx">The default format index.</param>
+        /// <param name="format">Describes the format to use.</param>
+        /// <returns>
+        ///     The format code.
+        /// </returns>
+        /// =================================================================================================
+        private static uint GetFormatCode(IReadOnlyDictionary<string, uint> dictionary, int defaultFormatIdx, string format)
+        {
+            if (dictionary.TryGetValue(format, out var code))
+                return code;
+            else if (SpreadsheetCustomDataFormatHelper.CustomDataFormat.TryGetValue(format, out var code1))
+            {
+                return code1;
+            }
+            else return (uint)defaultFormatIdx;
         }
     }
 }
