@@ -184,6 +184,86 @@ namespace GeneralDocumentGeneratorTests
         }
 
         [TestMethod]
+        public void CreateFileToFromStream_2_Test()
+        {
+            var wbd = new WorkbookDefinition
+            {
+                Worksheets = new List<WorksheetDefinition>
+                {
+                    new WorksheetDefinition
+                    {
+                        Name = "Sheet1",
+                        ColumnHeadings = new List<CellHeaderDefinition>
+                        {
+                            new CellHeaderDefinition("Name", true, false,
+                                new CellDataDefinition(CellDataType.String, SourceCellDataType.String)),
+                            new CellHeaderDefinition("Count", true, true,
+                                new CellDataDefinition(CellDataType.Number, SourceCellDataType.Int)),
+                            new CellHeaderDefinition("Date", true, false,
+                                //new CellDataDefinition(CellDataType.Date, SourceCellDataType.DateTime, "[$-10818]dd\\.mm\\.yyyy;@"))
+                                new CellDataDefinition(CellDataType.Date, SourceCellDataType.DateTime, "dd.mm.yyyy"))
+                        },
+                        Rows = new List<RowDefinition>
+                        {
+                            new RowDefinition
+                            {
+                                Cells = new List<CellValueDefinition>
+                                {
+                                    new CellValueDefinition("string 1"),
+                                    new CellValueDefinition(123),
+                                    new CellValueDefinition(DateTime.Now)
+                                }
+                            },
+                            new RowDefinition
+                            {
+                                Cells = new List<CellValueDefinition>
+                                {
+                                    new CellValueDefinition("string 2"),
+                                    new CellValueDefinition(225),
+                                    new CellValueDefinition(DateTime.Now.AddDays(-1))
+                                }
+                            }
+                        }
+                    },
+                    new WorksheetDefinition
+                    {
+                        Name = "Sheet2",
+                        ColumnHeadings = new List<CellHeaderDefinition>
+                        {
+                            new CellHeaderDefinition("NameX", true, false,
+                                new CellDataDefinition(CellDataType.String, SourceCellDataType.String)
+                                    { IsBold = true, IsItalic = true }),
+                            new CellHeaderDefinition("CountX", true, false,
+                                new CellDataDefinition(CellDataType.Number, SourceCellDataType.Int) { IsBold = true })
+                        },
+                        Rows = new List<RowDefinition>
+                        {
+                            new RowDefinition
+                            {
+                                Cells = new List<CellValueDefinition>
+                                {
+                                    new CellValueDefinition("string 12"),
+                                    new CellValueDefinition(1234)
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(),
+                $"CreateFileToFromStream_2_Test_{Guid.NewGuid():N}.xlsx");
+            using var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+
+            var res = SpreadsheetDocumentHelper.Instance.Write(fs, wbd);
+
+            if (res.IsSuccess.IsFalse())
+                throw new Exception(res.Messages.FirstOrDefault()?.ToString());
+
+            Assert.IsTrue(res.IsSuccess);
+        }
+
+        [TestMethod]
         public void CreateFileToFromStream_x_rows_Test()
         {
             var rows = new List<RowDefinition>();
