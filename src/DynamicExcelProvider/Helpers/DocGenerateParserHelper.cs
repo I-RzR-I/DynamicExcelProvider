@@ -248,14 +248,14 @@ namespace DynamicExcelProvider.Helpers
         /// </summary>
         /// <typeparam name="T">Generic type parameter.</typeparam>
         /// <param name="lcid">The lcid.</param>
-        /// <param name="customOutFields">Custom user defined output/result fields.</param>
+        /// <param name="customOutFields">(Optional) Custom user defined output/result fields.</param>
         /// <returns>
         ///     The template.
         /// </returns>
         /// =================================================================================================
         internal static IResult<byte[]> GenerateTemplate<T>(
             int lcid,
-            IReadOnlyCollection<string> customOutFields = null) 
+            IReadOnlyCollection<string> customOutFields = null)
             where T : class
         {
             const string sheetName = "Sheet1";
@@ -299,15 +299,15 @@ namespace DynamicExcelProvider.Helpers
         /// <typeparam name="T">Generic type parameter.</typeparam>
         /// <param name="stream">The stream.</param>
         /// <param name="lcid">The lcid.</param>
-        /// <param name="customOutFields">Custom user defined output/result fields.</param>
+        /// <param name="customOutFields">(Optional) Custom user defined output/result fields.</param>
         /// <returns>
         ///     The template.
         /// </returns>
         /// =================================================================================================
         internal static IResult GenerateTemplate<T>(
-            MemoryStream stream, 
+            MemoryStream stream,
             int lcid,
-            IReadOnlyCollection<string> customOutFields = null) 
+            IReadOnlyCollection<string> customOutFields = null)
             where T : class
         {
             const string sheetName = "Sheet1";
@@ -329,6 +329,39 @@ namespace DynamicExcelProvider.Helpers
                 isDynamic: true,
                 sourceRowType: typeof(T),
                 generateSheetValidations: true);
+            if (wbDef.IsSuccess.IsFalse())
+                return Result.Failure(wbDef.GetFirstMessage());
+
+            var document = SpreadsheetDocumentHelper.Instance.Write(
+                stream: stream,
+                workBook: wbDef.Response,
+                appendSheetValidations: true);
+
+            return document.IsSuccess.IsFalse()
+                ? Result.Failure(document.Messages.FirstOrDefault()?.Message)
+                : Result.Success();
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates a template.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="configuration">The configuration.</param>
+        /// <returns>
+        ///     The template.
+        /// </returns>
+        /// =================================================================================================
+        internal static IResult GenerateTemplate(
+            Stream stream,
+            ExcelTemplateWriteConfiguration configuration)
+        {
+            var sheetName = configuration.SheetName.IfNullOrWhiteSpace("Sheet1");
+            var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinitionTemplate(
+                sheetName,
+                configuration.ColumnHeadings,
+                configuration.SheetValidations,
+                configuration.SheetValidations.IsNullOrEmptyEnumerable().IsFalse());
             if (wbDef.IsSuccess.IsFalse())
                 return Result.Failure(wbDef.GetFirstMessage());
 

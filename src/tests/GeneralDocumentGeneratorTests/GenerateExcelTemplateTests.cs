@@ -20,6 +20,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System;
 using DomainCommonExtensions.DataTypeExtensions;
+using DynamicExcelProvider.WorkXCore.Enums;
+using DynamicExcelProvider.WorkXCore.Models;
+using System.Collections.Generic;
+using System.Linq;
+using DynamicExcelProvider.Enums;
+using DynamicExcelProvider.Models.Request.Configuration;
+using DynamicExcelProvider.Models.Request.Configuration.Template;
 
 namespace GeneralDocumentGeneratorTests
 {
@@ -118,6 +125,67 @@ namespace GeneralDocumentGeneratorTests
 
             Assert.IsNotNull(fs);
             Assert.IsNotNull(fs.Length > 0);
+        }
+
+        [TestMethod]
+        public void Generate_Template_With_ExcelTemplateWriteConfiguration_Test()
+        {
+            var templateSheetConfig = new ExcelTemplateWriteConfiguration()
+            {
+                SheetName = "Sheet1",
+                ColumnHeadings = new List<CellHeaderDefinition>
+                {
+                    new CellHeaderDefinition("Name", true, false,
+                        new CellDataDefinition(CellDataType.String, SourceCellDataType.String)),
+                    new CellHeaderDefinition("Count", true, true,
+                        new CellDataDefinition(CellDataType.Number, SourceCellDataType.Int)),
+                    new CellHeaderDefinition("Date", true, false,
+                        new CellDataDefinition(CellDataType.Date, SourceCellDataType.DateTime))
+                },
+                SheetValidations = new List<TemplateDataValidation>()
+                {
+                    new TemplateDataValidation()
+                    {
+                        PropertyIndex = 0,
+                        ValidationType = ValidationType.TextLength,
+                        OperatorType = ValidationOperatorType.LessThanOrEqual,
+                        MinValue = 10,
+                        PromptMessage = "Text length <= 10",
+                        ErrorMessage = "Max text length exceeded"
+                    },
+                    new TemplateDataValidation()
+                    {
+                        PropertyIndex = 1,
+                        ValidationType = ValidationType.Whole,
+                        OperatorType = ValidationOperatorType.Between,
+                        MinValue = 10,
+                        MaxValue = 15,
+                        PromptMessage = "Int value between 10 and 15",
+                        ErrorMessage = "Int value not in range",
+                    },
+                    new TemplateDataValidation()
+                    {
+                        PropertyIndex = 2,
+                        ValidationType = ValidationType.Date,
+                        OperatorType = ValidationOperatorType.Between,
+                        MinValue = DateTime.Now.AddDays(-2).ToString("yyyy-MM-dd"),
+                        MaxValue = DateTime.Now.ToString("yyyy-MM-dd"),
+                        PromptMessage = "Date range between today -2 and today",
+                        ErrorMessage = "Date not in range",
+                    }
+                }
+            };
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(),
+                $"Generate_Template_With_ExcelTemplateWriteConfiguration_Test_{Guid.NewGuid():N}.xlsx");
+            using var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+
+            var res = DocGenerateParserHelper.GenerateTemplate(fs, templateSheetConfig);
+
+            if (res.IsSuccess.IsFalse())
+                throw new Exception(res.Messages.FirstOrDefault()?.ToString());
+
+            Assert.IsTrue(res.IsSuccess);
         }
     }
 }

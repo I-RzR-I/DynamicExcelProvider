@@ -27,6 +27,7 @@ using DynamicExcelProvider.Helpers.Attributes;
 using DynamicExcelProvider.Models.Internal;
 using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
+using DynamicExcelProvider.Models.Request.Configuration.Template;
 using DynamicExcelProvider.WorkXCore.Models;
 using System;
 using System.Collections.Generic;
@@ -267,6 +268,52 @@ namespace DynamicExcelProvider.Helpers
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
+        ///     Builds and parse to workbook definition template.
+        /// </summary>
+        /// <param name="sheetName">Name of the sheet.</param>
+        /// <param name="columnHeadings">The column headings.</param>
+        /// <param name="sheetValidations">The sheet validations.</param>
+        /// <param name="generateSheetValidations">(Optional) True to generate sheet validations.</param>
+        /// <returns>
+        ///     An IResult&lt;WorkbookDefinition&gt;
+        /// </returns>
+        /// =================================================================================================
+        internal static IResult<WorkbookDefinition> BuildAndParseToWorkbookDefinitionTemplate(
+            string sheetName, IEnumerable<CellHeaderDefinition> columnHeadings,
+            IEnumerable<TemplateDataValidation> sheetValidations,
+            bool generateSheetValidations = false)
+        {
+            try
+            {
+                var wbDef = new WorkbookDefinition
+                {
+                    Worksheets = new List<WorksheetDefinition>(1)
+                    {
+                        new WorksheetDefinition
+                        {
+                            Name = sheetName,
+                            ColumnHeadings = columnHeadings,
+                            Rows = new List<RowDefinition>(),
+                            SheetValidations =
+                                generateSheetValidations.IsTrue()
+                                    ? DataValidationsBuildHelper.BuildSheetDataValidations(ref sheetValidations)
+                                    : null
+                        }
+                    }
+                };
+
+                return Result<WorkbookDefinition>.Success(wbDef);
+            }
+            catch (Exception e)
+            {
+                return Result<WorkbookDefinition>
+                    .Failure(e.Message)
+                    .AddError(e);
+            }
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
         ///     Parse and build rows from source.
         /// </summary>
         /// <param name="cells">The cells.</param>
@@ -275,7 +322,9 @@ namespace DynamicExcelProvider.Helpers
         ///     An IResult&lt;IEnumerable&lt;RowDefinition&gt;&gt;
         /// </returns>
         /// =================================================================================================
-        public static IResult<IEnumerable<RowDefinition>> ParseAndBuildRowsFromSource(IEnumerable<CellHeaderDefinition> cells, IEnumerable<dynamic> dataRows)
+        public static IResult<IEnumerable<RowDefinition>> ParseAndBuildRowsFromSource(
+            IEnumerable<CellHeaderDefinition> cells, 
+            IEnumerable<dynamic> dataRows)
         {
             try
             {

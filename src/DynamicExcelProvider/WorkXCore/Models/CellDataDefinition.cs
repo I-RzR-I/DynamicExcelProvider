@@ -221,7 +221,7 @@ namespace DynamicExcelProvider.WorkXCore.Models
                 {
                     _formatCode = value;
                 }
-                else if(SpreadsheetCustomDataFormatHelper.CustomDataFormat.ContainsKey(value))
+                else if (SpreadsheetCustomDataFormatHelper.CustomDataFormat.ContainsKey(value))
                 {
                     _formatCode = value;
                 }

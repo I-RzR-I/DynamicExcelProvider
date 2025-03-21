@@ -233,7 +233,7 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
             if (cellDataType == CellDataType.Date)
                 return GetFormatCode(CellDataDefinition.DateFormats, 14, formatCode);
 
-            return GetFormatCode(CellDataDefinition.StandardFormats, 0, formatCode); //GetFormatCode1(formatCode);
+            return GetFormatCode(CellDataDefinition.StandardFormats, 0, formatCode);
         }
 
         /// -------------------------------------------------------------------------------------------------
@@ -254,48 +254,48 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
                     var horizontalAlignValues = FileStyles.CellHAligns;
                     foreach (var horizontalAlign in horizontalAlignValues)
                         for (var isBoldIdx = 0; isBoldIdx <= 1; isBoldIdx++) // true or false
-                        for (var isItalicIdx = 0; isItalicIdx <= 1; isItalicIdx++) // true or false
-                        {
-                            var formatCodes = FileStyles.CellFormats;
-                            foreach (var formatCode in formatCodes)
+                            for (var isItalicIdx = 0; isItalicIdx <= 1; isItalicIdx++) // true or false
                             {
-                                var cellDataTypeValues = FileStyles.CellDataTypes;
-                                foreach (var cellDataType in cellDataTypeValues)
+                                var formatCodes = FileStyles.CellFormats;
+                                foreach (var formatCode in formatCodes)
                                 {
-                                    var sourceCellDataTypeValues = FileStyles.SourceCellDataTypes;
-                                    foreach (var sourceCellDataTypeValue in sourceCellDataTypeValues)
+                                    var cellDataTypeValues = FileStyles.CellDataTypes;
+                                    foreach (var cellDataType in cellDataTypeValues)
                                     {
-                                        var format = new CellFormat(
-                                            new Alignment
-                                            {
-                                                WrapText = wrapTextIdx.ToBool(),
-                                                Vertical = verticalAlign.Key.MapVerticalCellAlignmentToSource(),
-                                                Horizontal = horizontalAlign.Key.MapHorizontalCellAlignmentToSource()
-                                            }
-                                        )
+                                        var sourceCellDataTypeValues = FileStyles.SourceCellDataTypes;
+                                        foreach (var sourceCellDataTypeValue in sourceCellDataTypeValues)
                                         {
-                                            FontId = GetCellFontId(isBoldIdx.ToBool(), isItalicIdx.ToBool()),
-                                            FillId = (uint)fillId,
-                                            ApplyNumberFormat = true,
-                                            NumberFormatId = GetCellNumFormatId(
-                                                formatCode.Key,
-                                                cellDataType.Key,
-                                                sourceCellDataTypeValue.Key)
-                                        };
+                                            var format = new CellFormat(
+                                                new Alignment
+                                                {
+                                                    WrapText = wrapTextIdx.ToBool(),
+                                                    Vertical = verticalAlign.Key.MapVerticalCellAlignmentToSource(),
+                                                    Horizontal = horizontalAlign.Key.MapHorizontalCellAlignmentToSource()
+                                                }
+                                            )
+                                            {
+                                                FontId = GetCellFontId(isBoldIdx.ToBool(), isItalicIdx.ToBool()),
+                                                FillId = (uint)fillId,
+                                                ApplyNumberFormat = true,
+                                                NumberFormatId = GetCellNumFormatId(
+                                                    formatCode.Key,
+                                                    cellDataType.Key,
+                                                    sourceCellDataTypeValue.Key)
+                                            };
 
-                                        var key = BuildFormatCellBodyKey(wrapTextIdx, verticalAlign.Key.ToInt(),
-                                            horizontalAlign.Key.ToInt(), isBoldIdx, isItalicIdx,
-                                            (int)GetFormatCode(CellDataDefinition.StandardFormats,0, formatCode.Key),
-                                            cellDataType.Key.ToInt(), sourceCellDataTypeValue.Key.ToInt(), fillId);
+                                            var key = BuildFormatCellBodyKey(wrapTextIdx, verticalAlign.Key.ToInt(),
+                                                horizontalAlign.Key.ToInt(), isBoldIdx, isItalicIdx,
+                                                (int)GetFormatCode(CellDataDefinition.StandardFormats, 0, formatCode.Key),
+                                                cellDataType.Key.ToInt(), sourceCellDataTypeValue.Key.ToInt(), fillId);
 
-                                        CellFormatCodes.Add(key, startIdx);
-                                        CellFormats.Append(format);
+                                            CellFormatCodes.Add(key, startIdx);
+                                            CellFormats.Append(format);
 
-                                        startIdx++;
+                                            startIdx++;
+                                        }
                                     }
                                 }
                             }
-                        }
                 }
             }
         }
@@ -318,25 +318,26 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
                     var horizontalAlignValues = FileStyles.HeaderHAligns;
                     foreach (var horizontalAlign in horizontalAlignValues)
                         for (var isBoldIdx = 0; isBoldIdx <= 1; isBoldIdx++) // true or false
-                        for (var isItalicIdx = 0; isItalicIdx <= 1; isItalicIdx++) // true or false
-                        {
-                            var format = new CellFormat(
-                                new Alignment
-                                {
-                                    WrapText = wrapTextIdx.ToBool(),
-                                    Vertical = verticalAlign.Key.MapVerticalCellAlignmentToSource(),
-                                    Horizontal = horizontalAlign.Key.MapHorizontalCellAlignmentToSource()
-                                }
-                            ) { FontId = GetCellFontId(isBoldIdx.ToBool(), isItalicIdx.ToBool()), FillId = (uint)fillId };
+                            for (var isItalicIdx = 0; isItalicIdx <= 1; isItalicIdx++) // true or false
+                            {
+                                var format = new CellFormat(
+                                    new Alignment
+                                    {
+                                        WrapText = wrapTextIdx.ToBool(),
+                                        Vertical = verticalAlign.Key.MapVerticalCellAlignmentToSource(),
+                                        Horizontal = horizontalAlign.Key.MapHorizontalCellAlignmentToSource()
+                                    }
+                                )
+                                { FontId = GetCellFontId(isBoldIdx.ToBool(), isItalicIdx.ToBool()), FillId = (uint)fillId };
 
-                            var key = BuildFormatCellHeaderKey(wrapTextIdx, verticalAlign.Key.ToInt(),
-                                horizontalAlign.Key.ToInt(), isBoldIdx, isItalicIdx, fillId);
+                                var key = BuildFormatCellHeaderKey(wrapTextIdx, verticalAlign.Key.ToInt(),
+                                    horizontalAlign.Key.ToInt(), isBoldIdx, isItalicIdx, fillId);
 
-                            CellFormatCodes.Add(key, idx);
-                            CellFormats.Append(format);
+                                CellFormatCodes.Add(key, idx);
+                                CellFormats.Append(format);
 
-                            idx++;
-                        }
+                                idx++;
+                            }
                 }
             }
         }
