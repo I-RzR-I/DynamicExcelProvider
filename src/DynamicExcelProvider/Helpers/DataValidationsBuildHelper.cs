@@ -25,14 +25,16 @@ using DynamicExcelProvider.Attributes;
 using DynamicExcelProvider.Enums;
 using DynamicExcelProvider.Mapper;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
+using DynamicExcelProvider.Models.Request.Configuration.Template;
 using DynamicExcelProvider.WorkXCore.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-#endregion
-
 // ReSharper disable PossibleMultipleEnumeration
+
+#endregion
 
 namespace DynamicExcelProvider.Helpers
 {
@@ -53,7 +55,9 @@ namespace DynamicExcelProvider.Helpers
         ///     The DataValidations.
         /// </returns>
         /// =================================================================================================
-        internal static DataValidations BuildSheetDataValidations(ref IEnumerable<PropertyInfo> properties, ref IReadOnlyCollection<PropTranslateModel> outputProps)
+        internal static DataValidations BuildSheetDataValidations(
+            ref IEnumerable<PropertyInfo> properties,
+            ref IReadOnlyCollection<PropTranslateModel> outputProps)
         {
             try
             {
@@ -92,11 +96,27 @@ namespace DynamicExcelProvider.Helpers
                             dataValidation.ShowErrorMessage = new BooleanValue(true);
                         }
 
-                        if (validationAttribute.MinValue.IsNull().IsFalse())
-                            dataValidation.Formula1 = new Formula1($"{validationAttribute.MinValue}");
+                        if (validationAttribute.MinValue.IsNotNull())
+                        {
+                            if (validationAttribute.ValidationType == ValidationType.Date)
+                            {
+                                var parseDate = Convert.ToDateTime(validationAttribute.MinValue);
+                                dataValidation.Formula1 = new Formula1("DATE({0},{1},{2})".FormatWith(parseDate.Year, parseDate.Month, parseDate.Day));
+                            }
+                            else
+                                dataValidation.Formula1 = new Formula1($"{validationAttribute.MinValue}");
+                        }
 
-                        if (validationAttribute.MaxValue.IsNull().IsFalse())
-                            dataValidation.Formula2 = new Formula2($"{validationAttribute.MaxValue}");
+                        if (validationAttribute.MaxValue.IsNotNull())
+                        {
+                            if (validationAttribute.ValidationType == ValidationType.Date)
+                            {
+                                var parseDate = Convert.ToDateTime(validationAttribute.MaxValue);
+                                dataValidation.Formula2 = new Formula2("DATE({0},{1},{2})".FormatWith(parseDate.Year, parseDate.Month, parseDate.Day));
+                            }
+                            else
+                                dataValidation.Formula2 = new Formula2($"{validationAttribute.MaxValue}");
+                        }
 
                         if (validationAttribute.AllowedValues.IsNullOrEmptyEnumerable().IsFalse())
                             dataValidation.Formula1 = new Formula1($"\"{validationAttribute.AllowedValues.ListToString(",")}\"");
@@ -106,6 +126,90 @@ namespace DynamicExcelProvider.Helpers
 
                         dataValidations.Append(dataValidation);
                     }
+                }
+
+                return dataValidations;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Builds sheet data validations.
+        /// </summary>
+        /// <param name="sheetValidations">[in,out] The sheet validations.</param>
+        /// <returns>
+        ///     The DataValidations.
+        /// </returns>
+        /// =================================================================================================
+        internal static DataValidations BuildSheetDataValidations(
+            ref IEnumerable<TemplateDataValidation> sheetValidations)
+        {
+            try
+            {
+                var dataValidations = new DataValidations();
+
+                foreach (var validation in sheetValidations)
+                {
+                    var sheetColumnLetter = SpreadsheetExtensions.GetExcelColumnName(validation.PropertyIndex).Response;
+
+                    var dataValidation = new DataValidation
+                    {
+                        SequenceOfReferences = new ListValue<StringValue>
+                        {
+                            InnerText = $"{sheetColumnLetter}2:{sheetColumnLetter}1048576"
+                        },
+                        Type = new EnumValue<DataValidationValues>(EnumMapper.MapValidation(validation.ValidationType)),
+                        Operator = validation.ValidationType != ValidationType.List
+                            ? new EnumValue<DataValidationOperatorValues>(EnumMapper.MapOperator(validation.OperatorType))
+                            : null,
+                        AllowBlank = new BooleanValue(validation.AllowEmpty.IsTrue())
+                    };
+
+                    if (validation.PromptMessage.IsNullOrEmpty().IsFalse())
+                    {
+                        dataValidation.Prompt = validation.PromptMessage;
+                        dataValidation.ShowInputMessage = new BooleanValue(true);
+                    }
+
+                    if (validation.ErrorMessage.IsNullOrEmpty().IsFalse())
+                    {
+                        dataValidation.Error = validation.ErrorMessage;
+                        dataValidation.ShowErrorMessage = new BooleanValue(true);
+                    }
+
+                    if (validation.MinValue.IsNotNull())
+                    {
+                        if (validation.ValidationType == ValidationType.Date)
+                        {
+                            var parseDate = Convert.ToDateTime(validation.MinValue);
+                            dataValidation.Formula1 = new Formula1("DATE({0},{1},{2})".FormatWith(parseDate.Year, parseDate.Month, parseDate.Day));
+                        }
+                        else
+                            dataValidation.Formula1 = new Formula1($"{validation.MinValue}");
+                    }
+
+                    if (validation.MaxValue.IsNotNull())
+                    {
+                        if (validation.ValidationType == ValidationType.Date)
+                        {
+                            var parseDate = Convert.ToDateTime(validation.MaxValue);
+                            dataValidation.Formula2 = new Formula2("DATE({0},{1},{2})".FormatWith(parseDate.Year, parseDate.Month, parseDate.Day));
+                        }
+                        else
+                            dataValidation.Formula2 = new Formula2($"{validation.MaxValue}");
+                    }
+
+                    if (validation.AllowedValues.IsNullOrEmptyEnumerable().IsFalse())
+                        dataValidation.Formula1 = new Formula1($"\"{validation.AllowedValues.ListToString(",")}\"");
+
+                    if (validation.ShowListInDropDown.IsTrue())
+                        dataValidation.ShowDropDown = new BooleanValue(true);
+
+                    dataValidations.Append(dataValidation);
                 }
 
                 return dataValidations;

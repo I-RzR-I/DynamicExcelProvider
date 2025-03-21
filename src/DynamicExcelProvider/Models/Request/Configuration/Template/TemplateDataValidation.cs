@@ -1,13 +1,13 @@
 ﻿// ***********************************************************************
 //  Assembly         : RzR.Shared.Export.DynamicExcelProvider
 //  Author           : RzR
-//  Created On       : 2024-10-03 19:03
+//  Created On       : 2025-03-21 11:45
 // 
 //  Last Modified By : RzR
-//  Last Modified On : 2024-10-04 19:02
+//  Last Modified On : 2025-03-21 13:43
 // ***********************************************************************
-//  <copyright file="ExcelPropValidationAttribute.cs" company="">
-//   Copyright (c) RzR. All rights reserved.
+//  <copyright file="TemplateDataValidation.cs" company="RzR SOFT & TECH">
+//   Copyright © RzR. All rights reserved.
 //  </copyright>
 // 
 //  <summary>
@@ -17,24 +17,21 @@
 #region U S A G E S
 
 using DynamicExcelProvider.Enums;
-using System;
 using System.Collections.Generic;
 
 #endregion
 
-namespace DynamicExcelProvider.Attributes
+namespace DynamicExcelProvider.Models.Request.Configuration.Template
 {
     /// -------------------------------------------------------------------------------------------------
     /// <summary>
-    ///     Attribute for excel property validation.
+    ///     A template data validation.
     /// </summary>
-    /// <seealso cref="T:Attribute"/>
     /// =================================================================================================
-    [AttributeUsage(AttributeTargets.Property)]
-    public class ExcelPropValidationAttribute : Attribute
+    public class TemplateDataValidation
     {
-        /// <inheritdoc/>
-        public ExcelPropValidationAttribute(
+        /// <inheritdoc cref="TemplateDataValidation" />
+        public TemplateDataValidation(
             ValidationType validationType,
             ValidationOperatorType operatorType,
             string[] allowedValues,
@@ -57,8 +54,8 @@ namespace DynamicExcelProvider.Attributes
             ShowListInDropDown = false;
         }
 
-        /// <inheritdoc/>
-        public ExcelPropValidationAttribute(
+        /// <inheritdoc cref="TemplateDataValidation" />
+        public TemplateDataValidation(
             ValidationType validationType,
             ValidationOperatorType operatorType,
             string[] allowedValues,
@@ -77,8 +74,8 @@ namespace DynamicExcelProvider.Attributes
             ShowListInDropDown = false;
         }
 
-        /// <inheritdoc/>
-        public ExcelPropValidationAttribute(
+        /// <inheritdoc cref="TemplateDataValidation" />
+        public TemplateDataValidation(
             ValidationType validationType,
             ValidationOperatorType operatorType,
             object minValue,
@@ -96,8 +93,8 @@ namespace DynamicExcelProvider.Attributes
             AllowEmpty = allowEmpty;
         }
 
-        /// <inheritdoc/>
-        public ExcelPropValidationAttribute(
+        /// <inheritdoc cref="TemplateDataValidation" />
+        public TemplateDataValidation(
             ValidationType validationType,
             ValidationOperatorType operatorType,
             object minValue,
@@ -115,12 +112,22 @@ namespace DynamicExcelProvider.Attributes
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExcelPropValidationAttribute"/> class.
+        ///     Initializes a new instance of the <see cref="TemplateDataValidation" /> class.
         /// </summary>
         /// =================================================================================================
-        public ExcelPropValidationAttribute()
+        public TemplateDataValidation()
         {
         }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Gets or sets the property index.
+        /// </summary>
+        /// <value>
+        ///     The property index.
+        /// </value>
+        /// =================================================================================================
+        public int PropertyIndex { get; set; }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>

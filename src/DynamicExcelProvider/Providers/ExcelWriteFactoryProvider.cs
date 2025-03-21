@@ -21,6 +21,7 @@ using AggregatedGenericResultMessage.Abstractions;
 using AggregatedGenericResultMessage.Extensions.Result.Messages;
 using DynamicExcelProvider.Abstractions;
 using DynamicExcelProvider.Helpers;
+using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Export;
 using DynamicExcelProvider.WorkXCore.Abstractions;
@@ -170,21 +171,32 @@ namespace DynamicExcelProvider.Providers
             => await _spreadsheetDocumentService.WriteFileAsync(stream, workBook, cancellationToken);
 
         /// <inheritdoc />
-        public IResult<byte[]> GenerateTemplate<T>(int lcid) where T : class
-            => DocGenerateParserHelper.GenerateTemplate<T>(lcid);
+        public IResult<byte[]> GenerateTemplate<T>(int lcid, IReadOnlyCollection<string> customOutFields = null) where T : class
+            => DocGenerateParserHelper.GenerateTemplate<T>(lcid, customOutFields);
 
         /// <inheritdoc />
-        public IResult GenerateTemplate<T>(MemoryStream stream, int lcid) where T : class
-            => DocGenerateParserHelper.GenerateTemplate<T>(stream, lcid);
+        public IResult GenerateTemplate<T>(MemoryStream stream, int lcid,
+            IReadOnlyCollection<string> customOutFields = null) where T : class
+            => DocGenerateParserHelper.GenerateTemplate<T>(stream, lcid, customOutFields);
 
         /// <inheritdoc />
-        public async Task<IResult<byte[]>> GenerateTemplateAsync<T>(int lcid, 
+        public async Task<IResult<byte[]>> GenerateTemplateAsync<T>(int lcid,
+            IReadOnlyCollection<string> customOutFields = null,
             CancellationToken cancellationToken = default) where T : class
-            => await Task.Run(() => GenerateTemplate<T>(lcid), cancellationToken);
+            => await Task.Run(() => GenerateTemplate<T>(lcid, customOutFields), cancellationToken);
 
         /// <inheritdoc />
-        public async Task<IResult> GenerateTemplateAsync<T>(MemoryStream stream, int lcid, 
+        public async Task<IResult> GenerateTemplateAsync<T>(MemoryStream stream, int lcid,
+            IReadOnlyCollection<string> customOutFields = null,
             CancellationToken cancellationToken = default) where T : class
-            => await Task.Run(() => GenerateTemplate<T>(stream, lcid), cancellationToken);
+            => await Task.Run(() => GenerateTemplate<T>(stream, lcid, customOutFields), cancellationToken);
+
+        /// <inheritdoc />
+        public IResult GenerateTemplate(Stream stream, ExcelTemplateWriteConfiguration configuration)
+            => DocGenerateParserHelper.GenerateTemplate(stream, configuration);
+
+        /// <inheritdoc />
+        public async Task<IResult> GenerateTemplateAsync(Stream stream, ExcelTemplateWriteConfiguration configuration)
+            => await Task.Run(() => DocGenerateParserHelper.GenerateTemplate(stream, configuration));
     }
 }

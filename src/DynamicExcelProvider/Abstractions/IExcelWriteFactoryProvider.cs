@@ -17,6 +17,7 @@
 #region U S A G E S
 
 using AggregatedGenericResultMessage.Abstractions;
+using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Export;
 using DynamicExcelProvider.WorkXCore.Models;
@@ -56,7 +57,7 @@ namespace DynamicExcelProvider.Abstractions
         /// </returns>
         /// =================================================================================================
         Task<IResult<byte[]>> GenerateCsvFromKnownAsync(
-            IReadOnlyCollection<PropModel> embeddedModelCollection, IReadOnlyCollection<PropTranslateModel> availablePropInOutput, 
+            IReadOnlyCollection<PropModel> embeddedModelCollection, IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
             IEnumerable<IReadOnlyList<PropNameValue>> data, CancellationToken cancellationToken = default);
 
         /// -------------------------------------------------------------------------------------------------
@@ -207,11 +208,12 @@ namespace DynamicExcelProvider.Abstractions
         /// </summary>
         /// <typeparam name="T">Generic type parameter.</typeparam>
         /// <param name="lcid">The lcid.</param>
+        /// <param name="customOutFields">(Optional) Custom user defined output/result fields.</param>
         /// <returns>
         ///     The template.
         /// </returns>
         /// =================================================================================================
-        IResult<byte[]> GenerateTemplate<T>(int lcid) where T : class;
+        IResult<byte[]> GenerateTemplate<T>(int lcid, IReadOnlyCollection<string> customOutFields = null) where T : class;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -220,11 +222,13 @@ namespace DynamicExcelProvider.Abstractions
         /// <typeparam name="T">Generic type parameter.</typeparam>
         /// <param name="stream">The stream.</param>
         /// <param name="lcid">The lcid.</param>
+        /// <param name="customOutFields">(Optional) Custom user defined output/result fields.</param>
         /// <returns>
         ///     The template.
         /// </returns>
         /// =================================================================================================
-        IResult GenerateTemplate<T>(MemoryStream stream, int lcid) where T : class;
+        IResult GenerateTemplate<T>(MemoryStream stream, int lcid,
+            IReadOnlyCollection<string> customOutFields = null) where T : class;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -232,6 +236,7 @@ namespace DynamicExcelProvider.Abstractions
         /// </summary>
         /// <typeparam name="T">Generic type parameter.</typeparam>
         /// <param name="lcid">The lcid.</param>
+        /// <param name="customOutFields">(Optional) Custom user defined output/result fields.</param>
         /// <param name="cancellationToken">
         ///     (Optional) A token that allows processing to be cancelled.
         /// </param>
@@ -239,7 +244,8 @@ namespace DynamicExcelProvider.Abstractions
         ///     The template asynchronous.
         /// </returns>
         /// =================================================================================================
-        Task<IResult<byte[]>> GenerateTemplateAsync<T>(int lcid, CancellationToken cancellationToken = default) where T : class;
+        Task<IResult<byte[]>> GenerateTemplateAsync<T>(int lcid,
+            IReadOnlyCollection<string> customOutFields = null, CancellationToken cancellationToken = default) where T : class;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -248,6 +254,7 @@ namespace DynamicExcelProvider.Abstractions
         /// <typeparam name="T">Generic type parameter.</typeparam>
         /// <param name="stream">The stream.</param>
         /// <param name="lcid">The lcid.</param>
+        /// <param name="customOutFields">(Optional) Custom user defined output/result fields.</param>
         /// <param name="cancellationToken">
         ///     (Optional) A token that allows processing to be cancelled.
         /// </param>
@@ -255,6 +262,31 @@ namespace DynamicExcelProvider.Abstractions
         ///     The template asynchronous.
         /// </returns>
         /// =================================================================================================
-        Task<IResult> GenerateTemplateAsync<T>(MemoryStream stream, int lcid, CancellationToken cancellationToken = default) where T : class;
+        Task<IResult> GenerateTemplateAsync<T>(MemoryStream stream, int lcid,
+            IReadOnlyCollection<string> customOutFields = null, CancellationToken cancellationToken = default) where T : class;
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates a template.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="configuration">The configuration.</param>
+        /// <returns>
+        ///     The template.
+        /// </returns>
+        /// =================================================================================================
+        IResult GenerateTemplate(Stream stream, ExcelTemplateWriteConfiguration configuration);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates a template asynchronous.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="configuration">The configuration.</param>
+        /// <returns>
+        ///     The template asynchronous.
+        /// </returns>
+        /// =================================================================================================
+        Task<IResult> GenerateTemplateAsync(Stream stream, ExcelTemplateWriteConfiguration configuration);
     }
 }

@@ -41,6 +41,7 @@ namespace GeneralDocumentGeneratorTests.Models
         [ExcelPropName("Cod", 1048, true, 3)]
         public string Code { get; set; }
 
+        [ExcelPropValidation(ValidationType.Date, ValidationOperatorType.Between, minValue: "2025-03-12", maxValue: "2025-03-20", promptMessage: "Accept date only")]
         [ExcelPropName("Data Inceput", 1048, true, 5)]
         public DateTime StartDate { get; set; }
 

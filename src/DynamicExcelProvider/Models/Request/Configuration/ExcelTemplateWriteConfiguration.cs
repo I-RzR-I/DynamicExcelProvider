@@ -1,13 +1,13 @@
 ﻿// ***********************************************************************
 //  Assembly         : RzR.Shared.Export.DynamicExcelProvider
 //  Author           : RzR
-//  Created On       : 2024-01-29 20:18
+//  Created On       : 2025-03-21 11:36
 // 
 //  Last Modified By : RzR
-//  Last Modified On : 2024-02-07 00:31
+//  Last Modified On : 2025-03-21 18:53
 // ***********************************************************************
-//  <copyright file="SpreadsheetColumnHelper.cs" company="">
-//   Copyright (c) RzR. All rights reserved.
+//  <copyright file="ExcelTemplateWriteConfiguration.cs" company="RzR SOFT & TECH">
+//   Copyright © RzR. All rights reserved.
 //  </copyright>
 // 
 //  <summary>
@@ -16,44 +16,49 @@
 
 #region U S A G E S
 
-using DocumentFormat.OpenXml.Spreadsheet;
-
-// ReSharper disable ArrangeObjectCreationWhenTypeEvident
+using DynamicExcelProvider.Models.Request.Configuration.Template;
+using DynamicExcelProvider.WorkXCore.Models;
+using System.Collections.Generic;
 
 #endregion
 
-namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
+namespace DynamicExcelProvider.Models.Request.Configuration
 {
     /// -------------------------------------------------------------------------------------------------
     /// <summary>
-    ///     A spreadsheet style helper.
+    ///     An excel template write configuration.
     /// </summary>
     /// =================================================================================================
-    internal class SpreadsheetColumnHelper
+    public class ExcelTemplateWriteConfiguration
     {
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     (Immutable) The instance.
+        ///     Gets or sets the name.
         /// </summary>
+        /// <value>
+        ///     The name.
+        /// </value>
         /// =================================================================================================
-        internal static readonly SpreadsheetColumnHelper Instance = new SpreadsheetColumnHelper();
+        public string SheetName { get; set; }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Prevents a default instance of the <see cref="SpreadsheetColumnHelper" /> class from
-        ///     being created.
+        ///     Gets or sets the column headings.
         /// </summary>
+        /// <value>
+        ///     The column headings.
+        /// </value>
         /// =================================================================================================
-        private SpreadsheetColumnHelper() { }
+        public IReadOnlyCollection<CellHeaderDefinition> ColumnHeadings { get; set; }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Generates the columns width.
+        ///     Gets or sets the sheet validations.
         /// </summary>
-        /// <returns>
-        ///     The columns.
-        /// </returns>
+        /// <value>
+        ///     The sheet validations.
+        /// </value>
         /// =================================================================================================
-        internal Column GenerateColumns() => new() { Width = 100, CustomWidth = true };
+        public IReadOnlyCollection<TemplateDataValidation> SheetValidations { get; set; }
     }
 }

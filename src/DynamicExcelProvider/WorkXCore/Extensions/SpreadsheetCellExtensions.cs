@@ -23,6 +23,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.WorkXCore.Extensions.DataType;
 using DynamicExcelProvider.WorkXCore.Helpers;
+using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet;
 using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style;
 using DynamicExcelProvider.WorkXCore.Models;
 using System;
@@ -79,7 +80,7 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
                     cellDataDefinition.HorizontalCellAlignment.ToInt(),
                     cellDataDefinition.IsBold.ToInt(),
                     cellDataDefinition.IsItalic.ToInt(),
-                    CellDataDefinition.StandardFormats[cellDataDefinition.FormatCode],
+                    GetFormatCode(cellDataDefinition.FormatCode),
                     cellDataDefinition.CellDataType.ToInt(),
                     cellDataDefinition.SourceCellDataType.ToInt());
 
@@ -90,6 +91,25 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
             catch (Exception e)
             {
                 return Result<Cell>.Failure(e.Message).WithError(e);
+            }
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Gets format code.
+        /// </summary>
+        /// <param name="format">Describes the format to use.</param>
+        /// <returns>
+        ///     The format code.
+        /// </returns>
+        /// =================================================================================================
+        private static int GetFormatCode(string format)
+        {
+            if (CellDataDefinition.StandardFormats.TryGetValue(format, out var code))
+                return (int)code;
+            else
+            {
+                return (int)SpreadsheetCustomDataFormatHelper.CustomDataFormat[format];
             }
         }
     }

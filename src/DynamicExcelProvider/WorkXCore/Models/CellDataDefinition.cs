@@ -19,15 +19,15 @@
 using DomainCommonExtensions.CommonExtensions;
 using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.WorkXCore.Enums;
-using DynamicExcelProvider.WorkXCore.Helpers.Resources;
+using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet;
 using System;
 using System.Collections.Generic;
-
-#endregion
 
 // ReSharper disable RedundantDefaultMemberInitializer
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
+
+#endregion
 
 namespace DynamicExcelProvider.WorkXCore.Models
 {
@@ -43,7 +43,7 @@ namespace DynamicExcelProvider.WorkXCore.Models
         ///     (Immutable) The standard formats.
         /// </summary>
         /// =================================================================================================
-        public static readonly Dictionary<string, int> StandardFormats = new Dictionary<string, int>
+        public static readonly Dictionary<string, uint> StandardFormats = new()
         {
             { "General", 0 },
             { "0", 1 },
@@ -80,7 +80,7 @@ namespace DynamicExcelProvider.WorkXCore.Models
         ///     (Immutable) The number formats.
         /// </summary>
         /// =================================================================================================
-        internal static readonly Dictionary<string, int> NumberFormats = new()
+        internal static readonly Dictionary<string, uint> NumberFormats = new()
         {
             { "General", 0 },
             { "0", 1 },
@@ -100,7 +100,7 @@ namespace DynamicExcelProvider.WorkXCore.Models
         ///     (Immutable) The date and time formats.
         /// </summary>
         /// =================================================================================================
-        internal static readonly Dictionary<string, int> DateFormats = new()
+        internal static readonly Dictionary<string, uint> DateFormats = new()
         {
             { "mm-dd-yy", 14 },
             { "d-mmm-yy", 15 },
@@ -213,11 +213,26 @@ namespace DynamicExcelProvider.WorkXCore.Models
         public string FormatCode
         {
             get => _formatCode;
-            set => _formatCode = value.IsNull()
-                ? value
-                : StandardFormats.ContainsKey(value).IsTrue()
-                    ? value
-                    : throw new ArgumentOutOfRangeException(string.Format(MessagesInfo.InvalidCellFormat, value));
+            set
+            {
+                if (value.IsNull())
+                    _formatCode = value;
+                else if (StandardFormats.ContainsKey(value).IsTrue())
+                {
+                    _formatCode = value;
+                }
+                else if (SpreadsheetCustomDataFormatHelper.CustomDataFormat.ContainsKey(value))
+                {
+                    _formatCode = value;
+                }
+                else
+                {
+                    SpreadsheetCustomDataFormatHelper.SetCustomDataFormat(value);
+                    _formatCode = value;
+
+                    //throw new ArgumentOutOfRangeException(string.Format(MessagesInfo.InvalidCellFormat, value));
+                }
+            }
         }
 
         /// -------------------------------------------------------------------------------------------------

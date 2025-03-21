@@ -26,6 +26,7 @@ using DomainCommonExtensions.ArraysExtensions;
 using DomainCommonExtensions.CommonExtensions;
 using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.WorkXCore.Extensions;
+using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet;
 using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style;
 using DynamicExcelProvider.WorkXCore.Models;
 using System;
@@ -118,13 +119,15 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
 
                         // Add style
                         var stylePart = workbookPart.AddNewPart<WorkbookStylesPart>();
-
                         stylePart.Stylesheet = new Stylesheet(
+                            SpreadsheetCustomDataFormatHelper.GenerateNumberingFormat(),
                             SpreadsheetFontHelper.Instance.GenerateFonts(),
                             SpreadsheetFillHelper.Instance.GenerateFills(),
                             SpreadsheetBorderHelper.Instance.GenerateBorders(),
                             new SpreadsheetCellFormatHelper().GenerateCellFormats(GetAllSheetCellDefinitions(workBook.Worksheets)),
                             SpreadsheetColumnHelper.Instance.GenerateColumns());
+                        
+                        // Save style sheet
                         stylePart.Stylesheet.Save();
 
                         // Save workbook part
