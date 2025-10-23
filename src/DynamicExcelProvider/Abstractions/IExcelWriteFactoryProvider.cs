@@ -37,6 +37,59 @@ namespace DynamicExcelProvider.Abstractions
     /// =================================================================================================
     public interface IExcelWriteFactoryProvider
     {
+        #region SYNC
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an Excel file.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="request">The request.</param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        IResult Generate(Stream stream, ExcelCollectionExportConfiguration request);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an Excel file.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        IResult<byte[]> Generate(ExcelCollectionExportConfiguration request);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Writes a excel (spreadsheet, worksheet) file.
+        /// </summary>
+        /// <param name="filePath">Full pathname of the file.</param>
+        /// <param name="workBook">The work book.</param>
+        /// <returns>
+        ///     An IResult.
+        /// </returns>
+        /// =================================================================================================
+        IResult Generate(string filePath, WorkbookDefinition workBook);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Writes a excel (spreadsheet, worksheet) file.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="workBook">The work book.</param>
+        /// <returns>
+        ///     An IResult.
+        /// </returns>
+        /// =================================================================================================
+        IResult Generate(Stream stream, WorkbookDefinition workBook);
+
+        #endregion
+
+        #region ASYNC
+
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
         ///     Generate file byte[], must be saved as CVS and returned to client.
@@ -53,7 +106,7 @@ namespace DynamicExcelProvider.Abstractions
         ///     (Optional) A token that allows processing to be cancelled.
         /// </param>
         /// <returns>
-        ///     The generate CSV from known.
+        ///     The generated result CSV from known.
         /// </returns>
         /// =================================================================================================
         Task<IResult<byte[]>> GenerateCsvFromKnownAsync(
@@ -95,7 +148,7 @@ namespace DynamicExcelProvider.Abstractions
         ///     (Optional) A token that allows processing to be cancelled.
         /// </param>
         /// <returns>
-        ///     The generate.
+        ///     The generated result.
         /// </returns>
         /// =================================================================================================
         Task<IResult<byte[]>> GenerateAsync<TDataModel>(IReadOnlyCollection<TDataModel> data,
@@ -113,25 +166,11 @@ namespace DynamicExcelProvider.Abstractions
         ///     (Optional) A token that allows processing to be cancelled.
         /// </param>
         /// <returns>
-        ///     The generate.
+        ///     The generated result.
         /// </returns>
         /// =================================================================================================
         Task<IResult> GenerateAsync<TDataModel>(Stream stream, IReadOnlyCollection<TDataModel> data,
             int cultureId, CancellationToken cancellationToken = default) where TDataModel : class;
-
-        /// -------------------------------------------------------------------------------------------------
-        /// <summary>
-        ///     Generates an asynchronous Excel file.
-        /// </summary>
-        /// <param name="request">The request.</param>
-        /// <param name="cancellationToken">
-        ///     (Optional) A token that allows processing to be cancelled.
-        /// </param>
-        /// <returns>
-        ///     The generate.
-        /// </returns>
-        /// =================================================================================================
-        Task<IResult<byte[]>> GenerateAsync(ExcelCollectionExportConfiguration request, CancellationToken cancellationToken = default);
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -143,22 +182,24 @@ namespace DynamicExcelProvider.Abstractions
         ///     (Optional) A token that allows processing to be cancelled.
         /// </param>
         /// <returns>
-        ///     The generate.
+        ///     The generated result.
         /// </returns>
         /// =================================================================================================
         Task<IResult> GenerateAsync(Stream stream, ExcelCollectionExportConfiguration request, CancellationToken cancellationToken = default);
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Writes a excel (spreadsheet, worksheet) file.
+        ///     Generates an asynchronous Excel file.
         /// </summary>
-        /// <param name="filePath">Full pathname of the file.</param>
-        /// <param name="workBook">The work book.</param>
+        /// <param name="request">The request.</param>
+        /// <param name="cancellationToken">
+        ///     (Optional) A token that allows processing to be cancelled.
+        /// </param>
         /// <returns>
-        ///     An IResult.
+        ///     The generated result.
         /// </returns>
         /// =================================================================================================
-        IResult Generate(string filePath, WorkbookDefinition workBook);
+        Task<IResult<byte[]>> GenerateAsync(ExcelCollectionExportConfiguration request, CancellationToken cancellationToken = default);
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -177,18 +218,6 @@ namespace DynamicExcelProvider.Abstractions
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Writes a excel (spreadsheet, worksheet) file.
-        /// </summary>
-        /// <param name="stream">The stream.</param>
-        /// <param name="workBook">The work book.</param>
-        /// <returns>
-        ///     An IResult.
-        /// </returns>
-        /// =================================================================================================
-        IResult Generate(Stream stream, WorkbookDefinition workBook);
-
-        /// -------------------------------------------------------------------------------------------------
-        /// <summary>
         ///     Writes a excel (spreadsheet, worksheet) file asynchronous.
         /// </summary>
         /// <param name="stream">The stream.</param>
@@ -201,6 +230,10 @@ namespace DynamicExcelProvider.Abstractions
         /// </returns>
         /// =================================================================================================
         Task<IResult> GenerateAsync(Stream stream, WorkbookDefinition workBook, CancellationToken cancellationToken = default);
+
+        #endregion
+        
+        #region TEMPLATE
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -288,5 +321,7 @@ namespace DynamicExcelProvider.Abstractions
         /// </returns>
         /// =================================================================================================
         Task<IResult> GenerateTemplateAsync(Stream stream, ExcelTemplateWriteConfiguration configuration);
+
+        #endregion
     }
 }

@@ -32,9 +32,9 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-#endregion
-
 // ReSharper disable ClassNeverInstantiated.Global
+
+#endregion
 
 namespace DynamicExcelProvider.Providers
 {
@@ -62,6 +62,41 @@ namespace DynamicExcelProvider.Providers
         public ExcelWriteFactoryProvider(ISpreadsheetDocumentService spreadsheetDocumentService)
             => _spreadsheetDocumentService = spreadsheetDocumentService;
 
+        #region WRITE FILE
+
+        #region SYNC
+        
+        /// <inheritdoc />
+        public IResult Generate(Stream stream, ExcelCollectionExportConfiguration request)
+            => DocGenerateParserHelper.Generate(stream, request);
+
+        /// <inheritdoc />
+        public IResult<byte[]> Generate(ExcelCollectionExportConfiguration request)
+        {
+            try
+            {
+                return DocGenerateParserHelper.Generate(request);
+            }
+            catch (Exception e)
+            {
+                return Result<byte[]>
+                    .Failure("An error occurred on generate excel file")
+                    .AddException(e);
+            }
+        }
+
+        /// <inheritdoc />
+        public IResult Generate(string filePath, WorkbookDefinition workBook)
+            => _spreadsheetDocumentService.WriteFile(filePath, workBook);
+
+        /// <inheritdoc />
+        public IResult Generate(Stream stream, WorkbookDefinition workBook)
+            => _spreadsheetDocumentService.WriteFile(stream, workBook);
+
+        #endregion
+
+        #region ASYNC
+
         /// <inheritdoc />
         public async Task<IResult<byte[]>> GenerateCsvFromKnownAsync(
             IReadOnlyCollection<PropModel> embeddedModelCollection,
@@ -70,7 +105,8 @@ namespace DynamicExcelProvider.Providers
         {
             try
             {
-                var byteData = await Task.Run(() => DocGenerateParserHelper.Generate(embeddedModelCollection, availablePropInOutput, data), cancellationToken);
+                var byteData = await Task.Run(
+                    () => DocGenerateParserHelper.Generate(embeddedModelCollection, availablePropInOutput, data), cancellationToken);
 
                 return byteData;
             }
@@ -152,23 +188,20 @@ namespace DynamicExcelProvider.Providers
             => await Task.Run(() => DocGenerateParserHelper.Generate(stream, request), cancellationToken);
 
         /// <inheritdoc />
-        public IResult Generate(string filePath, WorkbookDefinition workBook)
-            => _spreadsheetDocumentService.WriteFile(filePath, workBook);
-
-        /// <inheritdoc />
         public async Task<IResult> GenerateAsync(string filePath, WorkbookDefinition workBook,
             CancellationToken cancellationToken = default)
             => await _spreadsheetDocumentService.WriteFileAsync(filePath, workBook, cancellationToken);
 
         /// <inheritdoc />
-        public IResult Generate(Stream stream, WorkbookDefinition workBook)
-            => _spreadsheetDocumentService.WriteFile(stream, workBook);
-
-        /// <inheritdoc />
-        public async Task<IResult> GenerateAsync(
-            Stream stream, WorkbookDefinition workBook,
+        public async Task<IResult> GenerateAsync(Stream stream, WorkbookDefinition workBook,
             CancellationToken cancellationToken = default)
             => await _spreadsheetDocumentService.WriteFileAsync(stream, workBook, cancellationToken);
+
+        #endregion
+
+        #endregion
+
+        #region TEMPLATE
 
         /// <inheritdoc />
         public IResult<byte[]> GenerateTemplate<T>(int lcid, IReadOnlyCollection<string> customOutFields = null) where T : class
@@ -198,5 +231,7 @@ namespace DynamicExcelProvider.Providers
         /// <inheritdoc />
         public async Task<IResult> GenerateTemplateAsync(Stream stream, ExcelTemplateWriteConfiguration configuration)
             => await Task.Run(() => DocGenerateParserHelper.GenerateTemplate(stream, configuration));
+
+        #endregion
     }
 }
