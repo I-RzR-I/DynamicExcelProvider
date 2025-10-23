@@ -1,75 +1,71 @@
 ﻿// ***********************************************************************
 //  Assembly         : RzR.Shared.Export.DynamicExcelProvider
 //  Author           : RzR
-//  Created On       : 2023-03-15 22:39
+//  Created On       : 2025-10-19 19:10
 // 
 //  Last Modified By : RzR
-//  Last Modified On : 2023-03-15 22:39
+//  Last Modified On : 2025-10-19 19:43
 // ***********************************************************************
-//  <copyright file="ExcelWriteConfiguration.cs" company="">
-//   Copyright (c) RzR. All rights reserved.
+//  <copyright file="ProviderInitInfo.cs" company="RzR SOFT & TECH">
+//   Copyright © RzR. All rights reserved.
 //  </copyright>
 // 
 //  <summary>
 //  </summary>
 // ***********************************************************************
 
-// ReSharper disable InconsistentNaming
-
-namespace DynamicExcelProvider.Models.Request.Configuration
+namespace DynamicExcelProvider.Helpers
 {
     /// -------------------------------------------------------------------------------------------------
     /// <summary>
-    ///     Excel write configuration.
+    ///     An excel provider initialize information helper.
     /// </summary>
     /// =================================================================================================
-    public class ExcelWriteConfiguration
+    internal static class ProviderInitInfo
     {
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Excel sheet name.
+        ///     The default maximum row number.
         /// </summary>
         /// =================================================================================================
-        public string SheetName = "Sheet1";
+        internal static int DefaultMaxRowNumber => 1000000;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Gets or sets the lcid.
+        ///     Gets a value indicating whether the apply maximum row number policy.
         /// </summary>
         /// <value>
-        ///     The lcid.
+        ///     True if apply maximum row number policy, false if not.
         /// </value>
         /// =================================================================================================
-        public int LCID { get; set; } = 1033;
+        internal static bool ApplyMaxRowNumberPolicy { get; private set; }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExcelWriteConfiguration"/> class.
+        ///     Gets the sheet maximum number of rows.
         /// </summary>
+        /// <value>
+        ///     The sheet maximum number of rows.
+        /// </value>
         /// =================================================================================================
-        public ExcelWriteConfiguration()
-        {
-        }
+        public static int SheetMaxNumberOfRows { get; private set; } = DefaultMaxRowNumber;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExcelWriteConfiguration"/> class.
+        ///     Sets maximum row number policy rule.
         /// </summary>
-        /// <param name="sheetName">Excel sheet name.</param>
+        /// <param name="optionValue">True to option value.</param>
         /// =================================================================================================
-        public ExcelWriteConfiguration(string sheetName) => SheetName = sheetName;
+        internal static void SetMaxRowNumberPolicyRule(bool optionValue)
+            => ApplyMaxRowNumberPolicy = optionValue;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ExcelWriteConfiguration"/> class.
+        ///     Sets sheet maximum number of rows.
         /// </summary>
-        /// <param name="sheetName">Excel sheet name.</param>
-        /// <param name="lcid">The lcid.</param>
+        /// <param name="optionValue">True to option value.</param>
         /// =================================================================================================
-        public ExcelWriteConfiguration(string sheetName, int lcid)
-        {
-            SheetName = sheetName;
-            LCID = lcid;
-        }
+        internal static void SetSheetMaxNumberOfRows(int optionValue)
+            => SheetMaxNumberOfRows = optionValue;
     }
 }
