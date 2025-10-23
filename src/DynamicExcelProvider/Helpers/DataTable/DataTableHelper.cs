@@ -133,7 +133,7 @@ namespace DynamicExcelProvider.Helpers.DataTable
         /// =================================================================================================
         internal static void AddRecord<TRow>(this System.Data.DataTable table, TRow record) where TRow : class
         {
-            var recordProps = record.GetPropertiesInfoFromT();
+            var recordProps = record.RExtGetPropertiesInfoFromT();
             var row = table.NewRow();
             var idx = 0;
             foreach (var item in _availablePropInOutput.OrderBy(x => x.Order))
@@ -167,7 +167,7 @@ namespace DynamicExcelProvider.Helpers.DataTable
         /// =================================================================================================
         internal static void AddRecordFromT<TRow>(this System.Data.DataTable table, TRow record)
         {
-            var recordProps = record.GetPropertiesInfoFromT();
+            var recordProps = record.RExtGetPropertiesInfoFromT();
             var row = table.NewRow();
             var idx = 0;
             foreach (var item in _availablePropInOutput.OrderBy(x => x.Order))

@@ -31,7 +31,7 @@ namespace WorkXCoreFuncTests
         [DataRow(true, 1)]
         public void CastBoolToInt(bool source, int excepted)
         {
-            Assert.AreEqual(excepted, source.ToInt());
+            Assert.AreEqual(excepted, source.RExtWxCToInt());
         }
 
         [TestMethod]
@@ -39,7 +39,7 @@ namespace WorkXCoreFuncTests
         [DataRow(true, 1)]
         public void CastNullableBoolToInt(bool? source, int excepted)
         {
-            Assert.AreEqual(excepted, source.ToInt());
+            Assert.AreEqual(excepted, source.RExtWxCToInt());
         }
     }
 }

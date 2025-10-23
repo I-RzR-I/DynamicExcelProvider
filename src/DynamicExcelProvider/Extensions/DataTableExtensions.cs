@@ -46,7 +46,7 @@ namespace DynamicExcelProvider.Extensions
         ///     Resulting CSV-style string.
         /// </returns>
         /// =================================================================================================
-        internal static string ToCSV(this DataTable table) => ToCSV(table, ",", true);
+        internal static string RExtToCSV(this DataTable table) => RExtToCSV(table, ",", true);
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -63,7 +63,7 @@ namespace DynamicExcelProvider.Extensions
         ///     Resulting CSV-style string.
         /// </returns>
         /// =================================================================================================
-        internal static string ToCSV(this DataTable table, bool includeHeader) => ToCSV(table, ",", includeHeader);
+        internal static string RExtToCSV(this DataTable table, bool includeHeader) => RExtToCSV(table, ",", includeHeader);
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -81,7 +81,7 @@ namespace DynamicExcelProvider.Extensions
         ///     Resulting CSV-style string.
         /// </returns>
         /// =================================================================================================
-        private static string ToCSV(this DataTable table, string delimiter, bool includeHeader)
+        private static string RExtToCSV(this DataTable table, string delimiter, bool includeHeader)
         {
             var result = new StringBuilder();
 

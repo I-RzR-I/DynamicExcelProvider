@@ -42,6 +42,6 @@ namespace DynamicExcelProvider.Extensions
         ///     An enumerator that allows foreach to be used to process the properties in this collection.
         /// </returns>
         /// =================================================================================================
-        internal static IEnumerable<PropertyInfo> GetProperties(this object obj) => obj.GetType().GetProperties();
+        internal static IEnumerable<PropertyInfo> RExtGetProperties(this object obj) => obj.GetType().GetProperties();
     }
 }

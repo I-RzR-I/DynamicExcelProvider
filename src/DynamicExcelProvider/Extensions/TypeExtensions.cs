@@ -31,7 +31,7 @@ namespace DynamicExcelProvider.Extensions
     /// <remarks>
     /// </remarks>
     /// =================================================================================================
-    public static class TypeExtensions
+    internal static class TypeExtensions
     {
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -47,7 +47,7 @@ namespace DynamicExcelProvider.Extensions
         ///     True if nullable property type, false if not.
         /// </returns>
         /// =================================================================================================
-        public static bool IsNullablePropType(this Type type)
+        internal static bool RExtIsNullablePropType(this Type type)
         {
             if (type.IsNull()) throw new ArgumentNullException(nameof(type));
 
@@ -65,7 +65,7 @@ namespace DynamicExcelProvider.Extensions
         ///     True if simple type, false if not.
         /// </returns>
         /// =================================================================================================
-        public static bool IsSimpleType(this Type type)
+        internal static bool RExtIsSimpleType(this Type type)
         {
             var underlyingType = Nullable.GetUnderlyingType(type);
             type = underlyingType ?? type;

@@ -41,7 +41,7 @@ namespace DynamicExcelProvider.WorkXCore.Extensions.DataType
         ///     Source as an int.
         /// </returns>
         /// =================================================================================================
-        internal static int ToInt(this bool source)
+        internal static int RExtWxCToInt(this bool source)
             => source.IsTrue() ? 1 : 0;
 
         /// -------------------------------------------------------------------------------------------------
@@ -53,7 +53,7 @@ namespace DynamicExcelProvider.WorkXCore.Extensions.DataType
         ///     Source as an int.
         /// </returns>
         /// =================================================================================================
-        internal static int ToInt(this bool? source)
+        internal static int RExtWxCToInt(this bool? source)
             => source.IsTrue() ? 1 : 0;
     }
 }

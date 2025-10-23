@@ -75,11 +75,11 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
                 cellInit.CellValue = cellValue.Response;
 
                 var cellStyleCode = SpreadsheetCellFormatHelper.BuildFormatCellBodyKey(
-                    cellDataDefinition.WrapText.ToInt(),
+                    cellDataDefinition.WrapText.RExtWxCToInt(),
                     cellDataDefinition.VerticalCellAlignment.ToInt(),
                     cellDataDefinition.HorizontalCellAlignment.ToInt(),
-                    cellDataDefinition.IsBold.ToInt(),
-                    cellDataDefinition.IsItalic.ToInt(),
+                    cellDataDefinition.IsBold.RExtWxCToInt(),
+                    cellDataDefinition.IsItalic.RExtWxCToInt(),
                     GetFormatCode(cellDataDefinition.FormatCode),
                     cellDataDefinition.CellDataType.ToInt(),
                     cellDataDefinition.SourceCellDataType.ToInt());
