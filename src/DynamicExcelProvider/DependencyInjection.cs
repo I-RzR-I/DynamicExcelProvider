@@ -16,11 +16,15 @@
 
 #region U S A G E S
 
+using DomainCommonExtensions.CommonExtensions;
 using DynamicExcelProvider.Abstractions;
+using DynamicExcelProvider.Helpers;
+using DynamicExcelProvider.Models.Request;
 using DynamicExcelProvider.Providers;
 using DynamicExcelProvider.WorkXCore.Abstractions;
 using DynamicExcelProvider.WorkXCore.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 // ReSharper disable UnusedMethodReturnValue.Local
 
@@ -62,19 +66,47 @@ namespace DynamicExcelProvider
         /// <summary>
         ///     Register excel data provider in DI.
         /// </summary>
-        /// <remarks>
-        /// </remarks>
         /// <param name="services">.</param>
+        /// <param name="writeOption">(Optional) The write option.</param>
         /// <returns>
         ///     An IServiceCollection.
         /// </returns>
         /// =================================================================================================
-        public static IServiceCollection RegisterExcelDataSourceProvider(this IServiceCollection services)
-
+        public static IServiceCollection RegisterExcelDataSourceProvider(this IServiceCollection services,
+            Action<ExcelWriteProviderOption> writeOption = null)
         {
+            SetProviderOptions(writeOption);
+
             services.RegisterExcelDataSourceProvider<ExcelWriteFactoryProvider>();
 
             return services;
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Sets provider options.
+        /// </summary>
+        /// <param name="writeOption">The write option.</param>
+        /// =================================================================================================
+        private static void SetProviderOptions(Action<ExcelWriteProviderOption> writeOption)
+        {
+            /*
+            writeOption = writeOption.IfIsNull(o =>
+            {
+                o.ApplyMaxColumnNumberPolicy = true;
+                o.ApplyMaxRowNumberPolicy = true;
+                o.SheetMaxNumberOfRows = ProviderInitInfo.DefaultMaxRowNumber;
+            });
+            */
+
+            if (writeOption.IsNotNull())
+            {
+                var wOption = new ExcelWriteProviderOption();
+                writeOption!(wOption);
+
+                ProviderInitInfo.SetMaxRowNumberPolicyRule(wOption.ApplyMaxRowNumberPolicy);
+                ProviderInitInfo.SetSheetMaxNumberOfRows(wOption.SheetMaxNumberOfRows);
+            }
         }
     }
 }

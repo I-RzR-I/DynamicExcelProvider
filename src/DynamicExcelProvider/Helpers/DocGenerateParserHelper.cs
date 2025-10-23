@@ -64,7 +64,8 @@ namespace DynamicExcelProvider.Helpers
             var table = DataTableHelper.CreateTableAndColumns();
             foreach (var record in data) table.AddRecordFromKnown(record);
 
-            return Result<byte[]>.Success(Encoding.GetEncoding("iso-8859-1").GetBytes(table.ToCSV()));
+            return Result<byte[]>
+                .Success(Encoding.GetEncoding("iso-8859-1").GetBytes(table.RExtToCSV()));
         }
 
         /// -------------------------------------------------------------------------------------------------
@@ -88,7 +89,8 @@ namespace DynamicExcelProvider.Helpers
             var table = DataTableHelper.CreateTableAndColumns();
             foreach (var record in data) table.AddRecord(record);
 
-            return Result<byte[]>.Success(Encoding.GetEncoding("iso-8859-1").GetBytes(table.ToCSV()));
+            return Result<byte[]>
+                .Success(Encoding.GetEncoding("iso-8859-1").GetBytes(table.RExtToCSV()));
         }
 
         /// -------------------------------------------------------------------------------------------------
