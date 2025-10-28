@@ -1,66 +1,71 @@
 ﻿// ***********************************************************************
 //  Assembly         : RzR.Shared.Export.DynamicExcelProvider
 //  Author           : RzR
-//  Created On       : 2023-03-15 22:43
+//  Created On       : 2025-10-19 19:10
 // 
 //  Last Modified By : RzR
-//  Last Modified On : 2023-03-15 22:50
+//  Last Modified On : 2025-10-19 19:43
 // ***********************************************************************
-//  <copyright file="PropNameValue.cs" company="">
-//   Copyright (c) RzR. All rights reserved.
+//  <copyright file="ProviderInitInfo.cs" company="RzR SOFT & TECH">
+//   Copyright © RzR. All rights reserved.
 //  </copyright>
 // 
 //  <summary>
 //  </summary>
 // ***********************************************************************
 
-namespace DynamicExcelProvider.Models.Request.Configuration.Property
+namespace DynamicExcelProvider.Helpers
 {
     /// -------------------------------------------------------------------------------------------------
     /// <summary>
-    ///     Property name value model.
+    ///     An excel provider initialize information helper.
     /// </summary>
     /// =================================================================================================
-    public class PropNameValue
+    internal static class ProviderInitInfo
     {
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Property name.
+        ///     The default maximum row number.
+        /// </summary>
+        /// =================================================================================================
+        internal static int DefaultMaxRowNumber => 1000000;
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Gets a value indicating whether the apply maximum row number policy.
         /// </summary>
         /// <value>
-        ///     The name.
+        ///     True if apply maximum row number policy, false if not.
         /// </value>
         /// =================================================================================================
-        public string Name { get; set; }
+        internal static bool ApplyMaxRowNumberPolicy { get; private set; }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Property value.
+        ///     Gets the sheet maximum number of rows.
         /// </summary>
         /// <value>
-        ///     The value.
+        ///     The sheet maximum number of rows.
         /// </value>
         /// =================================================================================================
-        public object Value { get; set; }
+        public static int SheetMaxNumberOfRows { get; private set; } = DefaultMaxRowNumber;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PropNameValue"/> class.
+        ///     Sets maximum row number policy rule.
         /// </summary>
+        /// <param name="optionValue">True to option value.</param>
         /// =================================================================================================
-        public PropNameValue() { }
+        internal static void SetMaxRowNumberPolicyRule(bool optionValue)
+            => ApplyMaxRowNumberPolicy = optionValue;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Initializes a new instance of the <see cref="PropNameValue"/> class.
+        ///     Sets sheet maximum number of rows.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="value">The value.</param>
+        /// <param name="optionValue">True to option value.</param>
         /// =================================================================================================
-        public PropNameValue(string name, object value)
-        {
-            Name = name;
-            Value = value;
-        }
+        internal static void SetSheetMaxNumberOfRows(int optionValue)
+            => SheetMaxNumberOfRows = optionValue;
     }
 }

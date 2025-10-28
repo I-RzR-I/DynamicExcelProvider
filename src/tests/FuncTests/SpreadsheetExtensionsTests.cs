@@ -17,6 +17,7 @@
 #region U S A G E S
 
 using System.Collections.Generic;
+using DynamicExcelProvider.Extensions;
 using DynamicExcelProvider.WorkXCore.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -43,6 +44,43 @@ namespace WorkXCoreFuncTests
             var validate = sheets.ValidateSheetsName();
 
             Assert.IsTrue(validate.IsSuccess);
+        }
+
+        [TestMethod]
+        public void ValidateSheetsNameLengthTest()
+        {
+            var sheets = new List<string> { "sheet1", "sheet2", "MySheetFullNameWithLongLength31", "MySheetFullNameWithLongLength_" };
+            var validate = sheets.ValidateSheetsName();
+
+            Assert.IsTrue(validate.IsSuccess);
+        }
+
+        [DataRow("Name1", "Name1")]
+        [DataRow("Name:1", "Name1")]
+        [DataRow("sheet1!", "sheet1!")]
+        [DataRow("sheet1*&!", "sheet1!")]
+        [TestMethod]
+        public void ToSafeSheetName_Test(string brutName, string netName)
+        {
+            var safeName = brutName.RExtToCleanSheetName();
+
+            Assert.IsNotNull(safeName);
+            Assert.AreEqual(netName, safeName);
+        }
+
+        [DataRow("Name1", "Name1_9")]
+        [DataRow("Name:1", "Name1_9")]
+        [DataRow("sheet1!", "sheet1!_9")]
+        [DataRow("sheet1*&!", "sheet1!_9")]
+        [DataRow("sheet1*$&!", "sheet1$!_9")]
+        [DataRow("sheet1*$&.!", "sheet1$.!_9")]
+        [TestMethod]
+        public void ToSafeSheetName_WithReplace_Test(string brutName, string netName)
+        {
+            var safeName = brutName.RExtToCleanSheetName("_9*");
+
+            Assert.IsNotNull(safeName);
+            Assert.AreEqual(netName, safeName);
         }
 
         [TestMethod]

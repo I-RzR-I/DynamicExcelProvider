@@ -147,13 +147,16 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
                         return Result<Sheet>.Failure(celIdx.GetFirstMessage());
 
                     var cellReference = $"{celIdx.Response}{rowIdx}";
-                    var cellStyleCode = SpreadsheetCellFormatHelper.BuildFormatCellHeaderKey(cell.WrapText.ToInt(),
+                    var cellStyleCode = SpreadsheetCellFormatHelper.BuildFormatCellHeaderKey(cell.WrapText.RExtWxCToInt(),
                         cell.VerticalCellAlignment.ToInt(),
-                        cell.HorizontalCellAlignment.ToInt(), cell.IsBold.ToInt(), cell.IsItalic.ToInt());
+                        cell.HorizontalCellAlignment.ToInt(), cell.IsBold.RExtWxCToInt(), cell.IsItalic.RExtWxCToInt());
 
                     var xCell = new Cell
                     {
-                        CellReference = cellReference, CellValue = new CellValue(cell.Name), DataType = CellValues.String, StyleIndex = SpreadsheetCellFormatHelper.GetFormatIdByCode(cellStyleCode)
+                        CellReference = cellReference, 
+                        CellValue = new CellValue(cell.Name), 
+                        DataType = CellValues.String, 
+                        StyleIndex = SpreadsheetCellFormatHelper.GetFormatIdByCode(cellStyleCode)
                     };
 
                     row.Append(xCell);

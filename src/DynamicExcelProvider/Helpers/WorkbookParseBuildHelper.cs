@@ -33,7 +33,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using TypeExtensions = DynamicExcelProvider.Extensions.TypeExtensions;
 
 // ReSharper disable AccessToModifiedClosure
 // ReSharper disable AssignNullToNotNullAttribute
@@ -69,7 +68,7 @@ namespace DynamicExcelProvider.Helpers
             {
                 var outputProps = new List<PropTranslateModel>();
                 var embeddedModelCollection = new List<PropModel>();
-                var props = data.GetProperties();
+                var props = data.RExtGetProperties();
 
                 foreach (var propertyInfo in props)
                 {
@@ -77,7 +76,7 @@ namespace DynamicExcelProvider.Helpers
                     {
                         CommonName = propertyInfo.Name,
                         DataType = TypeHelper.GetNonNullableType(propertyInfo.PropertyType).ToString(),
-                        IsNullable = TypeExtensions.IsNullablePropType(propertyInfo.PropertyType)
+                        IsNullable = propertyInfo.PropertyType.RExtIsNullablePropType()
                     });
                 }
 
@@ -133,19 +132,21 @@ namespace DynamicExcelProvider.Helpers
                 var embeddedModelCollection = new List<PropModel>();
                 var rowType = firstRow?.GetType() == null ? sourceRowType : firstRow.GetType();
                 var props = ((IEnumerable<PropertyInfo>)rowType!.GetProperties())
-                    .Where(x => TypeExtensions.IsSimpleType(x.PropertyType))
+                    .Where(x => x.PropertyType.RExtIsSimpleType())
                     .ToList();
 
                 foreach (var propertyInfo in props)
                 {
                     var prop = propertyInfo;
-                    if (TypeExtensions.IsSimpleType(prop.PropertyType))
+                    if (prop.PropertyType.RExtIsSimpleType())
+                    {
                         embeddedModelCollection.Add(new PropModel
                         {
                             CommonName = prop.Name,
                             DataType = TypeHelper.GetNonNullableType(prop.PropertyType).ToString(),
-                            IsNullable = TypeExtensions.IsNullablePropType(prop.PropertyType)
+                            IsNullable = prop.PropertyType.RExtIsNullablePropType()
                         });
+                    }
                 }
 
                 var propertiesAttributes = ((IEnumerable<ParseModelProperty>)PropNameAttributeHelper
@@ -203,58 +204,165 @@ namespace DynamicExcelProvider.Helpers
                     return Result<WorkbookDefinition>
                         .Failure("Can't define row type");
 
-                var rowType = data.IsNullOrEmptyEnumerable() ? sourceRowType : data.FirstOrDefault()?.GetType();
+                var rowType = data.IsNullOrEmptyEnumerable()
+                    ? sourceRowType
+                    : data.FirstOrDefault()?.GetType();
 
                 IEnumerable<PropertyInfo> props = rowType?.GetProperties()
-                    .Where(x => TypeExtensions.IsSimpleType(x.PropertyType))
+                    .Where(x => x.PropertyType.RExtIsSimpleType())
                     .ToList();
 
-                var wbDef = new WorkbookDefinition
-                {
-                    Worksheets = new List<WorksheetDefinition>(1)
+                var eModelCollection = embeddedModelCollection
+                    .DistinctBy(x => x.CommonName)
+                    .ToDictionary(keySelector: p => p.CommonName, elementSelector: p => p?.DataType);
+
+                var columnHeadings = outputProps
+                    .OrderBy(x => x.Order)
+                    .Select(x => new CellHeaderDefinition
                     {
-                        new WorksheetDefinition
+                        Name = x.TranslateName,
+                        IsItalic = x.IsItalic,
+                        IsBold = x.IsBold,
+                        WrapText = x.WrapText,
+                        CellData = new CellDataDefinition
+                        {
+                            //CellDataType = DataTypeHelper.GetColumnType(embeddedModelCollection
+                            //    .FirstOrDefault(a => a.CommonName == x.CommonName)?.DataType),
+                            //SourceCellDataType = DataTypeHelper.GetSourceColumnType(embeddedModelCollection
+                            //    .FirstOrDefault(a => a.CommonName == x.CommonName)?.DataType),
+                            CellDataType = DataTypeHelper.GetColumnType(eModelCollection[x.CommonName]),
+                            SourceCellDataType = DataTypeHelper.GetSourceColumnType(eModelCollection[x.CommonName]),
+                            FormatCode = x.Format ?? "0"
+                        }
+                    });
+
+                var sheetValidations = generateSheetValidations.IsTrue()
+                    ? DataValidationsBuildHelper.BuildSheetDataValidations(ref props, ref outputProps)
+                    : null;
+
+                var wbDef = new WorkbookDefinition()
+                {
+                    Worksheets = new List<WorksheetDefinition>()
+                };
+
+                if (ProviderInitInfo.ApplyMaxRowNumberPolicy.IsTrue())
+                {
+                    var worksheets = new List<WorksheetDefinition>();
+                    var tmpData = data.Chunked(ProviderInitInfo.SheetMaxNumberOfRows);
+
+                    for (var i = 0; i < tmpData.Count(); i++)
+                    {
+                        var rows = BuildWorksheetDefinitionRows(outputProps, tmpData.ElementAt(i), props, isDynamic);
+                        worksheets.Add(new WorksheetDefinition()
+                        {
+                            Name = sheetName.RExtToCleanSheetName($"_{i}"),
+                            ColumnHeadings = columnHeadings,
+                            Rows = rows,
+                            SheetValidations = sheetValidations
+                        });
+                    }
+
+                    wbDef.Worksheets = worksheets;
+                }
+                else
+                {
+                    wbDef.Worksheets = new List<WorksheetDefinition>(1)
+                    {
+                        new WorksheetDefinition()
                         {
                             Name = sheetName,
-                            ColumnHeadings = outputProps
-                                .OrderBy(x => x.Order)
-                                .Select(x => new CellHeaderDefinition
-                                {
-                                    Name = x.TranslateName,
-                                    IsItalic = x.IsItalic,
-                                    IsBold = x.IsBold,
-                                    WrapText = x.WrapText,
-                                    CellData = new CellDataDefinition
-                                    {
-                                        CellDataType = DataTypeHelper.GetColumnType(embeddedModelCollection
-                                            .FirstOrDefault(a => a.CommonName == x.CommonName)?.DataType),
-                                        SourceCellDataType = DataTypeHelper.GetSourceColumnType(embeddedModelCollection
-                                            .FirstOrDefault(a => a.CommonName == x.CommonName)?.DataType),
-                                        FormatCode = x.Format ?? "0"
-                                    }
-                                }),
-                            Rows = data.Select(row => new RowDefinition
-                            {
-                                Cells = outputProps.OrderBy(x => x.Order)
-                                    .Select(cell => new CellValueDefinition
-                                    {
-                                        DefaultValue = default,
-                                        Value = isDynamic.IsFalse()
-                                            ? row.GetPropertiesInfoFromT()
-                                                .FirstOrDefault(a => a.Name == cell.CommonName)?
-                                                .GetGetMethod(true).Invoke(row, new object[] { })
-                                            : props
-                                                .FirstOrDefault(a => a.Name == cell.CommonName)?
-                                                .GetGetMethod(true).Invoke(row, new object[] { })
-                                    })
-                            }),
-                            SheetValidations =
-                                generateSheetValidations.IsTrue()
-                                    ? DataValidationsBuildHelper.BuildSheetDataValidations(ref props, ref outputProps)
-                                    : null
+                            ColumnHeadings = columnHeadings,
+                            Rows = BuildWorksheetDefinitionRows(outputProps, data, props, isDynamic),
+                            SheetValidations = sheetValidations
                         }
-                    }
+                    };
+                }
+
+                return Result<WorkbookDefinition>.Success(wbDef);
+            }
+            catch (Exception e)
+            {
+                return Result<WorkbookDefinition>
+                    .Failure(e.Message)
+                    .AddError(e);
+            }
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Builds and parse to workbook definition.
+        /// </summary>
+        /// <param name="sheetName">Name of the sheet.</param>
+        /// <param name="outputProps">The output properties.</param>
+        /// <param name="embeddedModelCollection">Collection of embedded models.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="generateSheetValidations">(Optional) True to generate sheet validations.</param>
+        /// <returns>
+        ///     An IResult&lt;WorkbookDefinition&gt;
+        /// </returns>
+        /// =================================================================================================
+        internal static IResult<WorkbookDefinition> BuildAndParseToWorkbookDefinition(
+            string sheetName, IReadOnlyCollection<PropTranslateModel> outputProps,
+            IReadOnlyCollection<PropModel> embeddedModelCollection, IEnumerable<IReadOnlyCollection<PropNameValue>> data,
+            bool generateSheetValidations = false)
+        {
+            try
+            {
+                var eModelCollection = embeddedModelCollection
+                    .DistinctBy(x => x.CommonName)
+                    .ToDictionary(keySelector: p => p.CommonName, elementSelector: p => p?.DataType);
+
+                var columnHeadings = outputProps
+                    .OrderBy(x => x.Order)
+                    .Select(x => new CellHeaderDefinition
+                    {
+                        Name = x.TranslateName,
+                        IsItalic = x.IsItalic,
+                        IsBold = x.IsBold,
+                        WrapText = x.WrapText,
+                        CellData = new CellDataDefinition
+                        {
+                            CellDataType = DataTypeHelper.GetColumnType(eModelCollection[x.CommonName]),
+                            SourceCellDataType = DataTypeHelper.GetSourceColumnType(eModelCollection[x.CommonName]),
+                            FormatCode = x.Format ?? "0"
+                        }
+                    });
+
+                var wbDef = new WorkbookDefinition()
+                {
+                    Worksheets = new List<WorksheetDefinition>()
                 };
+
+                if (ProviderInitInfo.ApplyMaxRowNumberPolicy.IsTrue())
+                {
+                    var worksheets = new List<WorksheetDefinition>();
+                    var tmpData = data.Chunked(ProviderInitInfo.SheetMaxNumberOfRows);
+
+                    for (var i = 0; i < tmpData.Count(); i++)
+                    {
+                        var rows = BuildWorksheetDefinitionRows(outputProps, tmpData.ElementAt(i));
+                        worksheets.Add(new WorksheetDefinition()
+                        {
+                            Name = sheetName.RExtToCleanSheetName($"_{i}"),
+                            ColumnHeadings = columnHeadings,
+                            Rows = rows
+                        });
+                    }
+
+                    wbDef.Worksheets = worksheets;
+                }
+                else
+                {
+                    wbDef.Worksheets = new List<WorksheetDefinition>(1)
+                    {
+                        new WorksheetDefinition()
+                        {
+                            Name = sheetName,
+                            ColumnHeadings = columnHeadings,
+                            Rows = BuildWorksheetDefinitionRows(outputProps, data)
+                        }
+                    };
+                }
 
                 return Result<WorkbookDefinition>.Success(wbDef);
             }
@@ -323,7 +431,7 @@ namespace DynamicExcelProvider.Helpers
         /// </returns>
         /// =================================================================================================
         public static IResult<IEnumerable<RowDefinition>> ParseAndBuildRowsFromSource(
-            IEnumerable<CellHeaderDefinition> cells, 
+            IEnumerable<CellHeaderDefinition> cells,
             IEnumerable<dynamic> dataRows)
         {
             try
@@ -333,7 +441,7 @@ namespace DynamicExcelProvider.Helpers
                 {
                     var rowType = row?.GetType();
                     var props = ((IEnumerable<PropertyInfo>)rowType!.GetProperties())
-                        .Where(x => TypeExtensions.IsSimpleType(x.PropertyType)).ToList();
+                        .Where(x => x.PropertyType.RExtIsSimpleType()).ToList();
                     var rowCells = new List<CellValueDefinition>();
                     foreach (var cell in cells)
                     {
@@ -355,6 +463,75 @@ namespace DynamicExcelProvider.Helpers
                     .Failure(e.Message)
                     .AddError(e);
             }
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Enumerates build worksheet definition rows in this collection.
+        /// </summary>
+        /// <typeparam name="TResult">Type of the result.</typeparam>
+        /// <param name="outputProps">The output properties.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="props">The properties.</param>
+        /// <param name="isDynamic">True if is dynamic, false if not.</param>
+        /// <returns>
+        ///     An enumerator that allows foreach to be used to process build worksheet definition rows
+        ///     in this collection.
+        /// </returns>
+        /// =================================================================================================
+        private static IEnumerable<RowDefinition> BuildWorksheetDefinitionRows<TResult>(
+            IReadOnlyCollection<PropTranslateModel> outputProps,
+            IEnumerable<TResult> data,
+            IEnumerable<PropertyInfo> props,
+            bool isDynamic)
+        {
+            var rows = data.Select(row => new RowDefinition
+            {
+                Cells = outputProps.OrderBy(x => x.Order)
+                    .Select(cell => new CellValueDefinition
+                    {
+                        // ReSharper disable once PreferConcreteValueOverDefault
+                        DefaultValue = default,
+                        Value = isDynamic.IsFalse()
+                            ? row.RExtGetPropertiesInfoFromT()
+                                .FirstOrDefault(a => a.Name == cell.CommonName)?
+                                .GetGetMethod(true).Invoke(row, new object[] { })
+                            : props
+                                .FirstOrDefault(a => a.Name == cell.CommonName)?
+                                .GetGetMethod(true).Invoke(row, new object[] { })
+                    })
+            });
+
+            return rows;
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Enumerates build worksheet definition rows in this collection.
+        /// </summary>
+        /// <param name="outputProps">The output properties.</param>
+        /// <param name="data">The data.</param>
+        /// <returns>
+        ///     An enumerator that allows foreach to be used to process build worksheet definition rows
+        ///     in this collection.
+        /// </returns>
+        /// =================================================================================================
+        private static IEnumerable<RowDefinition> BuildWorksheetDefinitionRows(
+            IReadOnlyCollection<PropTranslateModel> outputProps,
+            IEnumerable<IReadOnlyCollection<PropNameValue>> data)
+        {
+            var rows = data.Select(row => new RowDefinition
+            {
+                Cells = outputProps.OrderBy(x => x.Order)
+                    .Select(cell => new CellValueDefinition
+                    {
+                        // ReSharper disable once PreferConcreteValueOverDefault
+                        DefaultValue = default,
+                        Value = row.FirstOrDefault(a => a.Name == cell.CommonName)?.Value
+                    })
+            });
+
+            return rows;
         }
     }
 }

@@ -15,6 +15,7 @@
 // ***********************************************************************
 
 // ReSharper disable InconsistentNaming
+
 namespace DynamicExcelProvider.Models.Request.Configuration
 {
     /// -------------------------------------------------------------------------------------------------

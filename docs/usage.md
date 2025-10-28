@@ -9,6 +9,12 @@ public void ConfigureServices(IServiceCollection services)
             ...
             
             services.RegisterExcelDataSourceProvider();
+            // or use global configuration
+            services.RegisterExcelDataSourceProvider(option =>
+            {
+                option.ApplyMaxRowNumberPolicy = true;
+                option.SheetMaxNumberOfRows = X;
+            });
             
             ...
         }

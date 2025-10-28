@@ -50,7 +50,7 @@ namespace DynamicExcelProvider.WorkXCore.Extensions.DataType
         ///     Source as a bool.
         /// </returns>
         /// =================================================================================================
-        internal static bool ToBool(this int source)
+        internal static bool RExtWxCToBool(this int source)
         {
             if (source < 0)
                 throw new ArgumentOutOfRangeException(nameof(source), source, MessagesInfo.InvalidInToToBool);
@@ -70,7 +70,7 @@ namespace DynamicExcelProvider.WorkXCore.Extensions.DataType
         ///     Source as a bool.
         /// </returns>
         /// =================================================================================================
-        internal static bool ToBool(this int? source)
+        internal static bool RExtWxCToBool(this int? source)
         {
             if (source.IsNull() || source < 0)
                 throw new ArgumentOutOfRangeException(nameof(source), source, MessagesInfo.InvalidInToToBool);

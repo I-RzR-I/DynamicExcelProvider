@@ -75,7 +75,9 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
             }
             catch (Exception e)
             {
-                return Result.Failure(e.Message).WithError(e);
+                return Result
+                    .Failure(e.Message)
+                    .WithError(e);
             }
         }
 
@@ -114,10 +116,14 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
                 var secondChar = (char)('A' + sc);
                 var thirdChar = (char)('A' + tc);
 
-                return Result<string>.Success(string.Format(CultureInfo.InvariantCulture, "{0}{1}{2}", firstChar, secondChar, thirdChar));
+                var result = string.Format(CultureInfo.InvariantCulture, "{0}{1}{2}", firstChar, secondChar, thirdChar);
+
+                return Result<string>
+                    .Success(result);
             }
 
-            return Result<string>.Failure(string.Format(MessagesInfo.ColumnReferenceOutOfRange, columnIndex));
+            return Result<string>
+                .Failure(string.Format(MessagesInfo.ColumnReferenceOutOfRange, columnIndex));
         }
 
         /// -------------------------------------------------------------------------------------------------
@@ -134,14 +140,16 @@ namespace DynamicExcelProvider.WorkXCore.Extensions
             try
             {
                 var validSheetName = new Regex(@"^[^'*\[\]/\\:?][^*\[\]/\\:?]{0,30}$");
-                if (!validSheetName.IsMatch(sheetName))
+                if (validSheetName.IsMatch(sheetName).IsFalse())
                     return Result.Failure(string.Format(MessagesInfo.InvalidSheetName, sheetName));
 
                 return Result.Success();
             }
             catch (Exception e)
             {
-                return Result.Failure(e.Message).WithError(e);
+                return Result
+                    .Failure(e.Message)
+                    .WithError(e);
             }
         }
     }

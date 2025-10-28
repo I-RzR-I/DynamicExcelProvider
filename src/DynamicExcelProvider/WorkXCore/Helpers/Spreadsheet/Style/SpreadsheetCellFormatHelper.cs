@@ -268,13 +268,13 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
                                             var format = new CellFormat(
                                                 new Alignment
                                                 {
-                                                    WrapText = wrapTextIdx.ToBool(),
+                                                    WrapText = wrapTextIdx.RExtWxCToBool(),
                                                     Vertical = verticalAlign.Key.MapVerticalCellAlignmentToSource(),
                                                     Horizontal = horizontalAlign.Key.MapHorizontalCellAlignmentToSource()
                                                 }
                                             )
                                             {
-                                                FontId = GetCellFontId(isBoldIdx.ToBool(), isItalicIdx.ToBool()),
+                                                FontId = GetCellFontId(isBoldIdx.RExtWxCToBool(), isItalicIdx.RExtWxCToBool()),
                                                 FillId = (uint)fillId,
                                                 ApplyNumberFormat = true,
                                                 NumberFormatId = GetCellNumFormatId(
@@ -323,12 +323,12 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
                                 var format = new CellFormat(
                                     new Alignment
                                     {
-                                        WrapText = wrapTextIdx.ToBool(),
+                                        WrapText = wrapTextIdx.RExtWxCToBool(),
                                         Vertical = verticalAlign.Key.MapVerticalCellAlignmentToSource(),
                                         Horizontal = horizontalAlign.Key.MapHorizontalCellAlignmentToSource()
                                     }
                                 )
-                                { FontId = GetCellFontId(isBoldIdx.ToBool(), isItalicIdx.ToBool()), FillId = (uint)fillId };
+                                { FontId = GetCellFontId(isBoldIdx.RExtWxCToBool(), isItalicIdx.RExtWxCToBool()), FillId = (uint)fillId };
 
                                 var key = BuildFormatCellHeaderKey(wrapTextIdx, verticalAlign.Key.ToInt(),
                                     horizontalAlign.Key.ToInt(), isBoldIdx, isItalicIdx, fillId);

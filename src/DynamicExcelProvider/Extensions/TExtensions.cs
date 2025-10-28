@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
 // ReSharper disable InconsistentNaming
 
 #endregion
@@ -43,7 +44,7 @@ namespace DynamicExcelProvider.Extensions
         ///     A T[].
         /// </returns>
         /// =================================================================================================
-        internal static T[] AppendTo<T>(this T first, params T[] items)
+        internal static T[] RExtAppendTo<T>(this T first, params T[] items)
         {
             var result = new T[items.Length + 1];
             result[0] = first;
@@ -62,7 +63,7 @@ namespace DynamicExcelProvider.Extensions
         ///     The properties information from t.
         /// </returns>
         /// =================================================================================================
-        internal static IList<PropertyInfo> GetPropertiesInfoFromT<TSource>(this TSource source)
+        internal static IList<PropertyInfo> RExtGetPropertiesInfoFromT<TSource>(this TSource source)
         {
             try
             {

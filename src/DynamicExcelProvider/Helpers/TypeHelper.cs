@@ -62,14 +62,14 @@ namespace DynamicExcelProvider.Helpers
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Get non nullable type.
+        ///     Get non-nullable type.
         /// </summary>
         /// <param name="type">.</param>
         /// <returns>
-        ///     The non nullable type.
+        ///     The non-nullable type.
         /// </returns>
         /// =================================================================================================
-        internal static Type GetNonNullableType(Type type) => type.IsNullablePropType()
+        internal static Type GetNonNullableType(Type type) => type.RExtIsNullablePropType()
             ? NullableTypeDict.FirstOrDefault(x => x.Key == type).Value
             : type;
     }
