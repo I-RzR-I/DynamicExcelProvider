@@ -1,3 +1,13 @@
+### **v2.1.0.4942** [[RzR](mailto:108324929+I-RzR-I@users.noreply.github.com)] 28-10-2025
+* [d6fb76f] (RzR) -> Auto commit uncommited files
+* [74ebbfa] (RzR) -> Fix project name in scripts.
+* [92206fc] (RzR) -> Add script generation and adjust docs.
+* [859d865] (RzR) -> Add new export methods from `DataTable` and `DataSet`.
+* [0e37bee] (RzR) -> Add max row limit per sheet implementation.
+* [b6dbce2] (RzR) -> Add max row limit per sheet configure option.
+* [e2e3cfb] (RzR) -> Reorganize methods and add new method.
+* [d964bc5] (RzR) -> Rename internal extension methods.
+
 ### **v2.0.0.0** 
 -> Add template generation based on user defined configuration (fields and validations) `GenerateTemplateAsync` and `GenerateTemplate`; <br />
 -> Add custom user defined fields on template generation based on class type (GenerateTemplate/Async&lt;T&gt;); <br />
