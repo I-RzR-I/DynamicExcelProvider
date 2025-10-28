@@ -29,7 +29,7 @@ set customVersion=$null
 set solutionPath=$('..\src\RzR.Shared.Export.sln')
 set packResultPath=$('..\nuget\')
 set packProjectsPath=$('..\src\DynamicExcelProvider\DynamicExcelProvider.csproj')
-set testProjectsPath=$('..\src\tests\FuncTests\FuncTests.csproj','..\src\tests\GeneralDocumentGeneratorTests\GeneralDocumentGeneratorTests.csproj')
+set testProjectsPath=$('..\src\tests\FuncTests\WorkXCoreFuncTests.csproj','..\src\tests\GeneralDocumentGeneratorTests\GeneralDocumentGeneratorTests.csproj')
 
 
 echo :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
