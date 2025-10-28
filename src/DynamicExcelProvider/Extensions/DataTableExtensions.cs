@@ -16,7 +16,12 @@
 
 #region U S A G E S
 
+using AggregatedGenericResultMessage;
+using AggregatedGenericResultMessage.Abstractions;
+using DynamicExcelProvider.Helpers;
+using DynamicExcelProvider.Models.Request.Configuration.Property;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
@@ -64,6 +69,66 @@ namespace DynamicExcelProvider.Extensions
         /// </returns>
         /// =================================================================================================
         internal static string RExtToCSV(this DataTable table, bool includeHeader) => RExtToCSV(table, ",", includeHeader);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     A DataTable extension method that converts a table to a row data.
+        /// </summary>
+        /// <param name="table">Table to convert.</param>
+        /// <returns>
+        ///     The given data converted to a row data.
+        /// </returns>
+        /// =================================================================================================
+        internal static IResult<(
+            string, 
+            IEnumerable<PropTranslateModel>,
+            IEnumerable<PropModel>,
+            IEnumerable<IReadOnlyCollection<PropNameValue>>)> ConvertToRowData(this DataTable table)
+        {
+            var sheetName = (table.TableName ?? "Sheet1").RExtToCleanSheetName();
+            var outputProps = new List<PropTranslateModel>();
+            var embeddedModelCollection = new List<PropModel>();
+            var rows = new List<List<PropNameValue>>();
+
+            var columnNr = table.Columns.Count;
+            for (var i = 0; i < columnNr; i++)
+            {
+                var column = table.Columns[i];
+
+                embeddedModelCollection.Add(new PropModel
+                {
+                    CommonName = column.ColumnName,
+                    DataType = TypeHelper.GetNonNullableType(column.DataType).ToString(),
+                    IsNullable = column.AllowDBNull
+                }); 
+                
+                outputProps.Add(new PropTranslateModel
+                {
+                    CommonName = column.ColumnName,
+                    Order = i,
+                    TranslateName = column.ColumnName,
+                    Format = "0",
+                    IsItalic = false,
+                    IsBold = false,
+                    WrapText = false
+                });
+            }
+
+            for (var i = 0; i < table.Rows.Count; i++)
+            {
+                var dictRow = new List<PropNameValue>();
+                var rowData = table.Rows[i];
+                for (var j = 0; j < columnNr; j++)
+                {
+                    var columnName = table.Columns[j].ColumnName;
+                    dictRow.Add(new PropNameValue(columnName, rowData[columnName]));
+                }
+                rows.Add(dictRow);
+            }
+
+            return Result<(string, IEnumerable<PropTranslateModel>, IEnumerable<PropModel>, IEnumerable<IReadOnlyCollection<PropNameValue>>)>
+                .Success((sheetName, outputProps, embeddedModelCollection, rows));
+        }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>

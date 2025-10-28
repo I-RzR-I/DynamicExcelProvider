@@ -19,6 +19,7 @@
 using AggregatedGenericResultMessage;
 using AggregatedGenericResultMessage.Abstractions;
 using AggregatedGenericResultMessage.Extensions.Result.Messages;
+using DomainCommonExtensions.Utilities.Ensure;
 using DynamicExcelProvider.Abstractions;
 using DynamicExcelProvider.Helpers;
 using DynamicExcelProvider.Models.Request.Configuration;
@@ -28,6 +29,7 @@ using DynamicExcelProvider.WorkXCore.Abstractions;
 using DynamicExcelProvider.WorkXCore.Models;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,7 +67,7 @@ namespace DynamicExcelProvider.Providers
         #region WRITE FILE
 
         #region SYNC
-        
+
         /// <inheritdoc />
         public IResult Generate(Stream stream, ExcelCollectionExportConfiguration request)
             => DocGenerateParserHelper.Generate(stream, request);
@@ -75,6 +77,8 @@ namespace DynamicExcelProvider.Providers
         {
             try
             {
+                DomainEnsure.IsNotNull(request, nameof(request));
+
                 return DocGenerateParserHelper.Generate(request);
             }
             catch (Exception e)
@@ -93,6 +97,121 @@ namespace DynamicExcelProvider.Providers
         public IResult Generate(Stream stream, WorkbookDefinition workBook)
             => _spreadsheetDocumentService.WriteFile(stream, workBook);
 
+        /// <inheritdoc />
+        public IResult Generate(Stream stream, DataTable dataTable)
+        {
+            try
+            {
+                DomainEnsure.IsNotNull(dataTable, nameof(dataTable));
+                DomainEnsure.IsNotNull(stream, nameof(stream));
+
+                var dataSet = new DataSet(nameof(Generate));
+                dataSet.Tables.Add(dataTable);
+
+                return DocGenerateParserHelper.Generate(dataSet, stream);
+            }
+            catch (Exception e)
+            {
+                return Result
+                    .Failure("An error occurred on generate excel file in `Stream`.")
+                    .AddException(e);
+            }
+        }
+
+        /// <inheritdoc />
+        public IResult<byte[]> Generate(DataTable dataTable)
+        {
+            try
+            {
+                DomainEnsure.IsNotNull(dataTable, nameof(dataTable));
+
+                var dataSet = new DataSet(nameof(Generate));
+                dataSet.Tables.Add(dataTable);
+
+                return DocGenerateParserHelper.Generate(dataSet);
+            }
+            catch (Exception e)
+            {
+                return Result<byte[]>
+                    .Failure("An error occurred on generate excel file bytes.")
+                    .AddException(e);
+            }
+        }
+
+        /// <inheritdoc />
+        public IResult Generate(string filePath, DataTable dataTable)
+        {
+            try
+            {
+                DomainEnsure.IsNotNullOrEmptyArgNull(filePath, nameof(filePath));
+                DomainEnsure.IsNotNull(dataTable, nameof(dataTable));
+
+                var dataSet = new DataSet(nameof(Generate));
+                dataSet.Tables.Add(dataTable);
+
+                return DocGenerateParserHelper.Generate(dataSet, filePath);
+            }
+            catch (Exception e)
+            {
+                return Result
+                    .Failure("An error occurred on generate excel file to file path.")
+                    .AddException(e);
+            }
+        }
+
+        /// <inheritdoc />
+        public IResult Generate(Stream stream, DataSet dataSet)
+        {
+            try
+            {
+                DomainEnsure.IsNotNull(stream, nameof(stream));
+                DomainEnsure.IsNotNull(dataSet, nameof(dataSet));
+
+                return DocGenerateParserHelper.Generate(dataSet, stream);
+            }
+            catch (Exception e)
+            {
+                return Result
+                    .Failure("An error occurred on generate excel file in `Stream` from DataSet.")
+                    .AddException(e);
+            }
+        }
+
+        /// <inheritdoc />
+        public IResult<byte[]> Generate(DataSet dataSet)
+        {
+            try
+            {
+                DomainEnsure.IsNotNull(dataSet, nameof(dataSet));
+
+                return DocGenerateParserHelper.Generate(dataSet);
+            }
+            catch (Exception e)
+            {
+                return Result<byte[]>
+                    .Failure("An error occurred on generate excel file bytes from DataSet.")
+                    .AddException(e);
+            }
+        }
+
+        /// <inheritdoc />
+        public IResult Generate(string filePath, DataSet dataSet)
+        {
+            try
+            {
+                DomainEnsure.IsNotNullOrEmptyArgNull(filePath, nameof(filePath));
+                DomainEnsure.IsNotNull(dataSet, nameof(dataSet));
+
+                return DocGenerateParserHelper.Generate(dataSet, filePath);
+            }
+            catch (Exception e)
+            {
+                return Result<byte[]>
+                    .Failure("An error occurred on generate excel file from DataSet.")
+                    .AddException(e);
+            }
+        }
+
         #endregion
 
         #region ASYNC
@@ -106,7 +225,7 @@ namespace DynamicExcelProvider.Providers
             try
             {
                 var byteData = await Task.Run(
-                    () => DocGenerateParserHelper.Generate(embeddedModelCollection, availablePropInOutput, data), cancellationToken);
+                    () => DocGenerateParserHelper.GenerateCsv(embeddedModelCollection, availablePropInOutput, data), cancellationToken);
 
                 return byteData;
             }
@@ -126,7 +245,7 @@ namespace DynamicExcelProvider.Providers
         {
             try
             {
-                var byteData = await Task.Run(() => DocGenerateParserHelper.Generate(embeddedModelCollection,
+                var byteData = await Task.Run(() => DocGenerateParserHelper.GenerateCsv(embeddedModelCollection,
                     availablePropInOutput, data), cancellationToken);
 
                 return byteData;
@@ -196,6 +315,33 @@ namespace DynamicExcelProvider.Providers
         public async Task<IResult> GenerateAsync(Stream stream, WorkbookDefinition workBook,
             CancellationToken cancellationToken = default)
             => await _spreadsheetDocumentService.WriteFileAsync(stream, workBook, cancellationToken);
+
+        /// <inheritdoc />
+        public async Task<IResult> GenerateAsync(Stream stream, DataTable dataTable,
+            CancellationToken cancellationToken = default)
+            => await Task.Run(() => Generate(stream, dataTable), cancellationToken);
+
+        /// <inheritdoc />
+        public async Task<IResult<byte[]>> GenerateAsync(DataTable dataTable,
+            CancellationToken cancellationToken = default)
+            => await Task.Run(() => Generate(dataTable), cancellationToken);
+
+        /// <inheritdoc />
+        public async Task<IResult> GenerateAsync(string filePath, DataTable dataTable,
+            CancellationToken cancellationToken = default)
+            => await Task.Run(() => Generate(filePath, dataTable), cancellationToken);
+
+        /// <inheritdoc />
+        public async Task<IResult> GenerateAsync(Stream stream, DataSet dataSet, CancellationToken cancellationToken = default)
+            => await Task.Run(() => Generate(stream, dataSet), cancellationToken);
+
+        /// <inheritdoc />
+        public async Task<IResult<byte[]>> GenerateAsync(DataSet dataSet, CancellationToken cancellationToken = default)
+            => await Task.Run(() => Generate(dataSet), cancellationToken);
+
+        /// <inheritdoc />
+        public async Task<IResult> GenerateAsync(string filePath, DataSet dataSet, CancellationToken cancellationToken = default)
+            => await Task.Run(() => Generate(filePath, dataSet), cancellationToken);
 
         #endregion
 

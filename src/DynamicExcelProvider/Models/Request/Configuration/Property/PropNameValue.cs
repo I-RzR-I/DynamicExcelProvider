@@ -42,5 +42,25 @@ namespace DynamicExcelProvider.Models.Request.Configuration.Property
         /// </value>
         /// =================================================================================================
         public object Value { get; set; }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="PropNameValue"/> class.
+        /// </summary>
+        /// =================================================================================================
+        public PropNameValue() { }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="PropNameValue"/> class.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="value">The value.</param>
+        /// =================================================================================================
+        public PropNameValue(string name, object value)
+        {
+            Name = name;
+            Value = value;
+        }
     }
 }

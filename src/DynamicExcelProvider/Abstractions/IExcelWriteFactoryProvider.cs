@@ -22,6 +22,7 @@ using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Export;
 using DynamicExcelProvider.WorkXCore.Models;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -85,6 +86,76 @@ namespace DynamicExcelProvider.Abstractions
         /// </returns>
         /// =================================================================================================
         IResult Generate(Stream stream, WorkbookDefinition workBook);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an Excel file.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="dataTable">The data table.</param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        IResult Generate(Stream stream, DataTable dataTable);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an Excel file.
+        /// </summary>
+        /// <param name="dataTable">The data table.</param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        IResult<byte[]> Generate(DataTable dataTable);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an Excel file.
+        /// </summary>
+        /// <param name="filePath">Full pathname of the file.</param>
+        /// <param name="dataTable">The data table.</param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        IResult Generate(string filePath, DataTable dataTable);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an Excel file.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="dataSet">Set the data belongs to.</param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        IResult Generate(Stream stream, DataSet dataSet);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an Excel file.
+        /// </summary>
+        /// <param name="dataSet">Set the data belongs to.</param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        IResult<byte[]> Generate(DataSet dataSet);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an Excel file.
+        /// </summary>
+        /// <param name="filePath">Full pathname of the file.</param>
+        /// <param name="dataSet">Set the data belongs to.</param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        IResult Generate(string filePath, DataSet dataSet);
 
         #endregion
 
@@ -231,8 +302,96 @@ namespace DynamicExcelProvider.Abstractions
         /// =================================================================================================
         Task<IResult> GenerateAsync(Stream stream, WorkbookDefinition workBook, CancellationToken cancellationToken = default);
 
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an asynchronous Excel file.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="dataTable">The data table.</param>
+        /// <param name="cancellationToken">
+        ///     (Optional) A token that allows processing to be cancelled.
+        /// </param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        Task<IResult> GenerateAsync(Stream stream, DataTable dataTable, CancellationToken cancellationToken = default);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an asynchronous Excel file.
+        /// </summary>
+        /// <param name="dataTable">The data table.</param>
+        /// <param name="cancellationToken">
+        ///     (Optional) A token that allows processing to be cancelled.
+        /// </param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        Task<IResult<byte[]>> GenerateAsync(DataTable dataTable, CancellationToken cancellationToken = default);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an asynchronous Excel file.
+        /// </summary>
+        /// <param name="filePath">Full pathname of the file.</param>
+        /// <param name="dataTable">The data table.</param>
+        /// <param name="cancellationToken">
+        ///     (Optional) A token that allows processing to be cancelled.
+        /// </param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        Task<IResult> GenerateAsync(string filePath, DataTable dataTable, CancellationToken cancellationToken = default);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an asynchronous Excel file.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="dataSet">Set the data belongs to.</param>
+        /// <param name="cancellationToken">
+        ///     (Optional) A token that allows processing to be cancelled.
+        /// </param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        Task<IResult> GenerateAsync(Stream stream, DataSet dataSet, CancellationToken cancellationToken = default);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an asynchronous Excel file.
+        /// </summary>
+        /// <param name="dataSet">Set the data belongs to.</param>
+        /// <param name="cancellationToken">
+        ///     (Optional) A token that allows processing to be cancelled.
+        /// </param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        Task<IResult<byte[]>> GenerateAsync(DataSet dataSet, CancellationToken cancellationToken = default);
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Generates an asynchronous Excel file.
+        /// </summary>
+        /// <param name="filePath">Full pathname of the file.</param>
+        /// <param name="dataSet">Set the data belongs to.</param>
+        /// <param name="cancellationToken">
+        ///     (Optional) A token that allows processing to be cancelled.
+        /// </param>
+        /// <returns>
+        ///     The generated result.
+        /// </returns>
+        /// =================================================================================================
+        Task<IResult> GenerateAsync(string filePath, DataSet dataSet, CancellationToken cancellationToken = default);
+
         #endregion
-        
+
         #region TEMPLATE
 
         /// -------------------------------------------------------------------------------------------------

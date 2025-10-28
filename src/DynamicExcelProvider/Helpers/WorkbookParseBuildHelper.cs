@@ -290,6 +290,92 @@ namespace DynamicExcelProvider.Helpers
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
+        ///     Builds and parse to workbook definition.
+        /// </summary>
+        /// <param name="sheetName">Name of the sheet.</param>
+        /// <param name="outputProps">The output properties.</param>
+        /// <param name="embeddedModelCollection">Collection of embedded models.</param>
+        /// <param name="data">The data.</param>
+        /// <param name="generateSheetValidations">(Optional) True to generate sheet validations.</param>
+        /// <returns>
+        ///     An IResult&lt;WorkbookDefinition&gt;
+        /// </returns>
+        /// =================================================================================================
+        internal static IResult<WorkbookDefinition> BuildAndParseToWorkbookDefinition(
+            string sheetName, IReadOnlyCollection<PropTranslateModel> outputProps,
+            IReadOnlyCollection<PropModel> embeddedModelCollection, IEnumerable<IReadOnlyCollection<PropNameValue>> data,
+            bool generateSheetValidations = false)
+        {
+            try
+            {
+                var eModelCollection = embeddedModelCollection
+                    .DistinctBy(x => x.CommonName)
+                    .ToDictionary(keySelector: p => p.CommonName, elementSelector: p => p?.DataType);
+
+                var columnHeadings = outputProps
+                    .OrderBy(x => x.Order)
+                    .Select(x => new CellHeaderDefinition
+                    {
+                        Name = x.TranslateName,
+                        IsItalic = x.IsItalic,
+                        IsBold = x.IsBold,
+                        WrapText = x.WrapText,
+                        CellData = new CellDataDefinition
+                        {
+                            CellDataType = DataTypeHelper.GetColumnType(eModelCollection[x.CommonName]),
+                            SourceCellDataType = DataTypeHelper.GetSourceColumnType(eModelCollection[x.CommonName]),
+                            FormatCode = x.Format ?? "0"
+                        }
+                    });
+
+                var wbDef = new WorkbookDefinition()
+                {
+                    Worksheets = new List<WorksheetDefinition>()
+                };
+
+                if (ProviderInitInfo.ApplyMaxRowNumberPolicy.IsTrue())
+                {
+                    var worksheets = new List<WorksheetDefinition>();
+                    var tmpData = data.Chunked(ProviderInitInfo.SheetMaxNumberOfRows);
+
+                    for (var i = 0; i < tmpData.Count(); i++)
+                    {
+                        var rows = BuildWorksheetDefinitionRows(outputProps, tmpData.ElementAt(i));
+                        worksheets.Add(new WorksheetDefinition()
+                        {
+                            Name = sheetName.RExtToCleanSheetName($"_{i}"),
+                            ColumnHeadings = columnHeadings,
+                            Rows = rows
+                        });
+                    }
+
+                    wbDef.Worksheets = worksheets;
+                }
+                else
+                {
+                    wbDef.Worksheets = new List<WorksheetDefinition>(1)
+                    {
+                        new WorksheetDefinition()
+                        {
+                            Name = sheetName,
+                            ColumnHeadings = columnHeadings,
+                            Rows = BuildWorksheetDefinitionRows(outputProps, data)
+                        }
+                    };
+                }
+
+                return Result<WorkbookDefinition>.Success(wbDef);
+            }
+            catch (Exception e)
+            {
+                return Result<WorkbookDefinition>
+                    .Failure(e.Message)
+                    .AddError(e);
+            }
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
         ///     Builds and parse to workbook definition template.
         /// </summary>
         /// <param name="sheetName">Name of the sheet.</param>
@@ -413,6 +499,35 @@ namespace DynamicExcelProvider.Helpers
                             : props
                                 .FirstOrDefault(a => a.Name == cell.CommonName)?
                                 .GetGetMethod(true).Invoke(row, new object[] { })
+                    })
+            });
+
+            return rows;
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Enumerates build worksheet definition rows in this collection.
+        /// </summary>
+        /// <param name="outputProps">The output properties.</param>
+        /// <param name="data">The data.</param>
+        /// <returns>
+        ///     An enumerator that allows foreach to be used to process build worksheet definition rows
+        ///     in this collection.
+        /// </returns>
+        /// =================================================================================================
+        private static IEnumerable<RowDefinition> BuildWorksheetDefinitionRows(
+            IReadOnlyCollection<PropTranslateModel> outputProps,
+            IEnumerable<IReadOnlyCollection<PropNameValue>> data)
+        {
+            var rows = data.Select(row => new RowDefinition
+            {
+                Cells = outputProps.OrderBy(x => x.Order)
+                    .Select(cell => new CellValueDefinition
+                    {
+                        // ReSharper disable once PreferConcreteValueOverDefault
+                        DefaultValue = default,
+                        Value = row.FirstOrDefault(a => a.Name == cell.CommonName)?.Value
                     })
             });
 

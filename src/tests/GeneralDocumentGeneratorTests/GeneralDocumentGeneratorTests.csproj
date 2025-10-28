@@ -18,4 +18,8 @@
     <ProjectReference Include="..\..\DynamicExcelProvider\DynamicExcelProvider.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Internal\" />
+  </ItemGroup>
+
 </Project>

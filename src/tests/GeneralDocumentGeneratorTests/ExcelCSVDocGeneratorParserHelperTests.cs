@@ -121,7 +121,7 @@ namespace GeneralDocumentGeneratorTests
                 new PropNameValue { Name = "DataSfarsit", Value = $"{DateTime.Now.AddDays(2)}" }
             });
 
-            var dataBytes = DocGenerateParserHelper.Generate(generalInputModel, translated,
+            var dataBytes = DocGenerateParserHelper.GenerateCsv(generalInputModel, translated,
                 (IEnumerable<IEnumerable<PropNameValue>>)data);
 
             if (dataBytes.IsSuccess.IsFalse())
@@ -236,7 +236,7 @@ namespace GeneralDocumentGeneratorTests
                 }
             };
 
-            var dataBytes = DocGenerateParserHelper.Generate(generalInputModel, translated, records);
+            var dataBytes = DocGenerateParserHelper.GenerateCsv(generalInputModel, translated, records);
 
             if (dataBytes.IsSuccess.IsFalse())
                 throw new Exception(dataBytes.GetFirstMessage());

@@ -18,14 +18,18 @@
 
 using AggregatedGenericResultMessage;
 using AggregatedGenericResultMessage.Abstractions;
+using AggregatedGenericResultMessage.Extensions.Result.Messages;
 using DomainCommonExtensions.ArraysExtensions;
 using DomainCommonExtensions.DataTypeExtensions;
+using DomainCommonExtensions.Utilities.Ensure;
 using DynamicExcelProvider.Extensions;
 using DynamicExcelProvider.Helpers.DataTable;
 using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Export;
 using DynamicExcelProvider.WorkXCore.Helpers;
+using DynamicExcelProvider.WorkXCore.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,9 +60,10 @@ namespace DynamicExcelProvider.Helpers
         ///     An IResult.
         /// </returns>
         /// =================================================================================================
-        internal static IResult<byte[]> Generate(
+        internal static IResult<byte[]> GenerateCsv(
             IReadOnlyCollection<PropModel> embeddedModelCollection,
-            IReadOnlyCollection<PropTranslateModel> availablePropInOutput, IEnumerable<IEnumerable<PropNameValue>> data)
+            IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
+            IEnumerable<IEnumerable<PropNameValue>> data)
         {
             DataTableHelper.InitDataTable(embeddedModelCollection, availablePropInOutput);
             var table = DataTableHelper.CreateTableAndColumns();
@@ -80,7 +85,7 @@ namespace DynamicExcelProvider.Helpers
         ///     An IResult.
         /// </returns>
         /// =================================================================================================
-        internal static IResult<byte[]> Generate<TDataModel>(
+        internal static IResult<byte[]> GenerateCsv<TDataModel>(
             IReadOnlyCollection<PropModel> embeddedModelCollection,
             IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
             IReadOnlyCollection<TDataModel> data) where TDataModel : class
@@ -242,6 +247,128 @@ namespace DynamicExcelProvider.Helpers
             return document.IsSuccess.IsFalse()
                 ? Result.Failure(document.Messages.FirstOrDefault()?.Message)
                 : Result.Success();
+        }
+
+        internal static IResult<byte[]> Generate(System.Data.DataSet dataSet)
+        {
+            try
+            {
+                DomainEnsure.IsNotNull(dataSet, nameof(dataSet));
+
+                var worksheets = new List<WorksheetDefinition>();
+                var idx = 0;
+                foreach (System.Data.DataTable table in dataSet.Tables)
+                {
+                    var parsedTable = table.ConvertToRowData();
+                    if (parsedTable.IsSuccess.IsFalse())
+                        return Result<byte[]>.Failure(parsedTable.GetFirstMessage());
+
+                    var (sheetName, ptm, pm, resultRows) = parsedTable.Response;
+
+                    var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(
+                        sheetName.IfNullOrEmpty($"Sheet{idx += 1}").RExtToCleanSheetName(),
+                        ptm as IReadOnlyCollection<PropTranslateModel>,
+                        pm as IReadOnlyCollection<PropModel>,
+                        resultRows);
+
+                    if (wbDef.IsSuccess.IsFalse())
+                        return Result<byte[]>.Failure(wbDef.GetFirstMessage());
+
+                    worksheets.AddRange(wbDef.Response.Worksheets);
+                }
+
+                var ms = new MemoryStream();
+                var document = SpreadsheetDocumentHelper.Instance.Write(ms, new WorkbookDefinition(worksheets));
+
+                return document.IsSuccess.IsFalse()
+                    ? Result<byte[]>.Failure(document.Messages.FirstOrDefault()?.Message)
+                    : Result<byte[]>.Success(ms.ToArray());
+            }
+            catch (Exception e)
+            {
+                return Result<byte[]>.Failure(e.Message)
+                    .AddError(e);
+            }
+        }
+
+        internal static IResult Generate(System.Data.DataSet dataSet, Stream stream)
+        {
+            try
+            {
+                DomainEnsure.IsNotNull(dataSet, nameof(dataSet));
+
+                var worksheets = new List<WorksheetDefinition>();
+                var idx = 0;
+                foreach (System.Data.DataTable table in dataSet.Tables)
+                {
+                    var parsedTable = table.ConvertToRowData();
+                    if (parsedTable.IsSuccess.IsFalse())
+                        return Result.Failure(parsedTable.GetFirstMessage());
+
+                    var (sheetName, ptm, pm, resultRows) = parsedTable.Response;
+
+                    var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(
+                        sheetName.IfNullOrEmpty($"Sheet{idx += 1}").RExtToCleanSheetName(),
+                        ptm as IReadOnlyCollection<PropTranslateModel>,
+                        pm as IReadOnlyCollection<PropModel>,
+                        resultRows);
+                    if (wbDef.IsSuccess.IsFalse())
+                        return Result.Failure(wbDef.GetFirstMessage());
+
+                    worksheets.AddRange(wbDef.Response.Worksheets);
+                }
+
+                var document = SpreadsheetDocumentHelper.Instance.Write(stream, new WorkbookDefinition(worksheets));
+
+                return document.IsSuccess.IsFalse()
+                    ? Result.Failure(document.GetFirstMessage())
+                    : Result.Success();
+            }
+            catch (Exception e)
+            {
+                return Result.Failure(e.Message)
+                    .AddError(e);
+            }
+        }
+
+        internal static IResult Generate(System.Data.DataSet dataSet, string filePath)
+        {
+            try
+            {
+                DomainEnsure.IsNotNull(dataSet, nameof(dataSet));
+
+                var worksheets = new List<WorksheetDefinition>();
+                var idx = 0;
+                foreach (System.Data.DataTable table in dataSet.Tables)
+                {
+                    var parsedTable = table.ConvertToRowData();
+                    if (parsedTable.IsSuccess.IsFalse())
+                        return Result.Failure(parsedTable.GetFirstMessage());
+
+                    var (sheetName, ptm, pm, resultRows) = parsedTable.Response;
+
+                    var wbDef = WorkbookParseBuildHelper.BuildAndParseToWorkbookDefinition(
+                        sheetName.IfNullOrEmpty($"Sheet{idx += 1}").RExtToCleanSheetName(),
+                        ptm as IReadOnlyCollection<PropTranslateModel>,
+                        pm as IReadOnlyCollection<PropModel>,
+                        resultRows);
+                    if (wbDef.IsSuccess.IsFalse())
+                        return Result.Failure(wbDef.GetFirstMessage());
+
+                    worksheets.AddRange(wbDef.Response.Worksheets);
+                }
+
+                var document = SpreadsheetDocumentHelper.Instance.Write(filePath, new WorkbookDefinition(worksheets));
+
+                return document.IsSuccess.IsFalse()
+                    ? Result.Failure(document.GetFirstMessage())
+                    : Result.Success();
+            }
+            catch (Exception e)
+            {
+                return Result.Failure(e.Message)
+                    .AddError(e);
+            }
         }
 
         /// -------------------------------------------------------------------------------------------------
