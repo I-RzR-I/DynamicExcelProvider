@@ -25,6 +25,14 @@ namespace DynamicExcelProvider.Helpers
     {
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
+        ///     The absolute maximum row number allowed on a sheet.
+        ///     Excel supports 1.048.576 rows, one of them is reserved for the column headings row.
+        /// </summary>
+        /// =================================================================================================
+        private const int AbsoluteMaxRowNumber = 1_048_575;
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
         ///     The default maximum row number.
         /// </summary>
         /// =================================================================================================
@@ -33,16 +41,22 @@ namespace DynamicExcelProvider.Helpers
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
         ///     Gets a value indicating whether the apply maximum row number policy.
+        ///     The initializer is the no dependency injection default, the document generation helpers are
+        ///     reachable without any registration. It must stay in sync with the defaults assigned by the
+        ///     parameterless ExcelWriteProviderOption constructor.
         /// </summary>
         /// <value>
         ///     True if apply maximum row number policy, false if not.
+        ///     Default = true.
         /// </value>
         /// =================================================================================================
-        internal static bool ApplyMaxRowNumberPolicy { get; private set; }
+        internal static bool ApplyMaxRowNumberPolicy { get; private set; } = true;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
         ///     Gets the sheet maximum number of rows.
+        ///     The initializer is the no dependency injection default and must stay in sync with the defaults
+        ///     assigned by the parameterless ExcelWriteProviderOption constructor.
         /// </summary>
         /// <value>
         ///     The sheet maximum number of rows.
@@ -62,10 +76,23 @@ namespace DynamicExcelProvider.Helpers
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
         ///     Sets sheet maximum number of rows.
+        ///     A value lower than or equal to zero falls back to the default, a value greater than the Excel
+        ///     sheet capacity is capped so the generated document stays valid.
         /// </summary>
-        /// <param name="optionValue">True to option value.</param>
+        /// <param name="optionValue">The requested maximum number of rows per sheet.</param>
         /// =================================================================================================
         internal static void SetSheetMaxNumberOfRows(int optionValue)
-            => SheetMaxNumberOfRows = optionValue;
+        {
+            if (optionValue <= 0)
+            {
+                SheetMaxNumberOfRows = DefaultMaxRowNumber;
+
+                return;
+            }
+
+            SheetMaxNumberOfRows = optionValue > AbsoluteMaxRowNumber
+                ? AbsoluteMaxRowNumber
+                : optionValue;
+        }
     }
 }
