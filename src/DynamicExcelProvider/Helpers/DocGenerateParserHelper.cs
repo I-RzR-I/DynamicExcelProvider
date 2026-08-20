@@ -16,12 +16,6 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage;
-using AggregatedGenericResultMessage.Abstractions;
-using AggregatedGenericResultMessage.Extensions.Result.Messages;
-using DomainCommonExtensions.ArraysExtensions;
-using DomainCommonExtensions.DataTypeExtensions;
-using DomainCommonExtensions.Utilities.Ensure;
 using DynamicExcelProvider.Extensions;
 using DynamicExcelProvider.Helpers.DataTable;
 using DynamicExcelProvider.Models.Request.Configuration;
@@ -29,6 +23,13 @@ using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Export;
 using DynamicExcelProvider.WorkXCore.Helpers;
 using DynamicExcelProvider.WorkXCore.Models;
+using RzR.Extensions.Domain.Collections;
+using RzR.Extensions.Domain.Primitives;
+using RzR.Extensions.Domain.Text;
+using RzR.Extensions.Domain.Validation;
+using RzR.ResultMessage;
+using RzR.ResultMessage.Abstractions;
+using RzR.ResultMessage.Extensions.Result.Messages;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -56,6 +57,12 @@ namespace DynamicExcelProvider.Helpers
         /// <param name="embeddedModelCollection">Collection of embedded models.</param>
         /// <param name="availablePropInOutput">The available property in output.</param>
         /// <param name="data">The data.</param>
+        /// <param name="encoding">
+        ///     (Optional) Encoding of the generated CSV bytes. When omitted, <c>iso-8859-1</c> is used to
+        ///     preserve the historical output. That code page cannot represent characters outside Latin-1
+        ///     (for example 'ș', 'Ș' or '€'), which are irreversibly replaced by '?'. Pass an explicit
+        ///     Unicode encoding when such characters must survive.
+        /// </param>
         /// <returns>
         ///     An IResult.
         /// </returns>
@@ -63,14 +70,15 @@ namespace DynamicExcelProvider.Helpers
         internal static IResult<byte[]> GenerateCsv(
             IReadOnlyCollection<PropModel> embeddedModelCollection,
             IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
-            IEnumerable<IEnumerable<PropNameValue>> data)
+            IEnumerable<IEnumerable<PropNameValue>> data,
+            Encoding encoding = null)
         {
             DataTableHelper.InitDataTable(embeddedModelCollection, availablePropInOutput);
             var table = DataTableHelper.CreateTableAndColumns();
             foreach (var record in data) table.AddRecordFromKnown(record);
 
             return Result<byte[]>
-                .Success(Encoding.GetEncoding("iso-8859-1").GetBytes(table.RExtToCSV()));
+                .Success(GetCsvEncoding(encoding).GetBytes(table.RExtToCSV()));
         }
 
         /// -------------------------------------------------------------------------------------------------
@@ -81,6 +89,12 @@ namespace DynamicExcelProvider.Helpers
         /// <param name="embeddedModelCollection">Collection of embedded models.</param>
         /// <param name="availablePropInOutput">The available property in output.</param>
         /// <param name="data">The data.</param>
+        /// <param name="encoding">
+        ///     (Optional) Encoding of the generated CSV bytes. When omitted, <c>iso-8859-1</c> is used to
+        ///     preserve the historical output. That code page cannot represent characters outside Latin-1
+        ///     (for example 'ș', 'Ș' or '€'), which are irreversibly replaced by '?'. Pass an explicit
+        ///     Unicode encoding when such characters must survive.
+        /// </param>
         /// <returns>
         ///     An IResult.
         /// </returns>
@@ -88,15 +102,27 @@ namespace DynamicExcelProvider.Helpers
         internal static IResult<byte[]> GenerateCsv<TDataModel>(
             IReadOnlyCollection<PropModel> embeddedModelCollection,
             IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
-            IReadOnlyCollection<TDataModel> data) where TDataModel : class
+            IReadOnlyCollection<TDataModel> data,
+            Encoding encoding = null) where TDataModel : class
         {
             DataTableHelper.InitDataTable(embeddedModelCollection, availablePropInOutput);
             var table = DataTableHelper.CreateTableAndColumns();
             foreach (var record in data) table.AddRecord(record);
 
             return Result<byte[]>
-                .Success(Encoding.GetEncoding("iso-8859-1").GetBytes(table.RExtToCSV()));
+                .Success(GetCsvEncoding(encoding).GetBytes(table.RExtToCSV()));
         }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Resolves the encoding used to render CSV output.
+        /// </summary>
+        /// <param name="encoding">The requested encoding, or null to use the default one.</param>
+        /// <returns>
+        ///     The requested encoding, or <c>iso-8859-1</c> when none was requested.
+        /// </returns>
+        /// =================================================================================================
+        private static Encoding GetCsvEncoding(Encoding encoding) => encoding ?? Encoding.GetEncoding("iso-8859-1");
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>

@@ -16,13 +16,15 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage;
-using AggregatedGenericResultMessage.Abstractions;
 using DynamicExcelProvider.Helpers;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
+using RzR.Extensions.Domain.Primitives;
+using RzR.ResultMessage;
+using RzR.ResultMessage.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Text;
 
 // ReSharper disable InconsistentNaming
@@ -107,7 +109,7 @@ namespace DynamicExcelProvider.Extensions
                     CommonName = column.ColumnName,
                     Order = i,
                     TranslateName = column.ColumnName,
-                    Format = "0",
+                    Format = "General",
                     IsItalic = false,
                     IsBold = false,
                     WrapText = false
@@ -121,7 +123,9 @@ namespace DynamicExcelProvider.Extensions
                 for (var j = 0; j < columnNr; j++)
                 {
                     var columnName = table.Columns[j].ColumnName;
-                    dictRow.Add(new PropNameValue(columnName, rowData[columnName]));
+                    var columnValue = rowData[j];
+
+                    dictRow.Add(new PropNameValue(columnName, columnValue.IsDbNull() ? null : columnValue));
                 }
                 rows.Add(dictRow);
             }
@@ -154,11 +158,11 @@ namespace DynamicExcelProvider.Extensions
             {
                 foreach (DataColumn column in table.Columns)
                 {
-                    result.Append(column.ColumnName);
+                    result.Append(CsvField(column.ColumnName));
                     result.Append(delimiter);
                 }
 
-                result.Remove(--result.Length, 0);
+                if (result.Length >= delimiter.Length) result.Length -= delimiter.Length;
                 result.Append(Environment.NewLine);
             }
 
@@ -166,24 +170,40 @@ namespace DynamicExcelProvider.Extensions
             {
                 foreach (var item in row.ItemArray)
                 {
-                    if (item is DBNull)
-                    {
-                        result.Append(delimiter);
-                    }
-                    else
-                    {
-                        var itemAsString = item.ToString();
-                        itemAsString = itemAsString.Replace("\"", "\"\"");
-                        itemAsString = "\"" + itemAsString + "\"";
-                        result.Append(itemAsString + delimiter);
-                    }
+                    result.Append(CsvField(item));
+                    result.Append(delimiter);
                 }
 
-                result.Remove(--result.Length, 0);
+                if (result.Length >= delimiter.Length) result.Length -= delimiter.Length;
                 result.Append(Environment.NewLine);
             }
 
             return result.ToString();
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Formats a single value as a CSV field. The value is quoted and its embedded quotes are
+        ///     doubled (RFC 4180), and a leading character that a spreadsheet would interpret as the start
+        ///     of a formula is neutralized with a leading apostrophe.
+        /// </summary>
+        /// <param name="item">The value to format.</param>
+        /// <returns>
+        ///     The value rendered as a CSV field, or an empty string when the value is missing.
+        /// </returns>
+        /// =================================================================================================
+        private static string CsvField(object item)
+        {
+            if (item.IsNull() || item.IsDbNull()) return string.Empty;
+
+            var value = Convert.ToString(item, CultureInfo.InvariantCulture) ?? string.Empty;
+
+            if (value.Length > 0
+                && "=+-@\t\r".IndexOf(value[0]) >= 0
+                && !double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                value = "'" + value;
+
+            return "\"" + value.Replace("\"", "\"\"") + "\"";
         }
     }
 }
