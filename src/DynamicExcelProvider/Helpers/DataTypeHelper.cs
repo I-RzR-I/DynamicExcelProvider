@@ -188,17 +188,29 @@ namespace DynamicExcelProvider.Helpers
                 case "tinyint":
                 case "smallint":
                 case "short":
+                    columnType = SourceCellDataType.Short;
+                    break;
+
                 case "int":
                 case "int32":
+                    columnType = SourceCellDataType.Int;
+                    break;
+
                 case "int64":
                 case "long":
                 case "bigint":
+                    columnType = SourceCellDataType.Long;
+                    break;
+
                 case "decimal":
                 case "numeric":
+                    columnType = SourceCellDataType.Decimal;
+                    break;
+
                 case "double":
                 case "float":
                 case "real":
-                    columnType = SourceCellDataType.Int;
+                    columnType = SourceCellDataType.Float;
                     break;
 
                 case "bool":

@@ -16,15 +16,15 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage;
-using AggregatedGenericResultMessage.Abstractions;
-using AggregatedGenericResultMessage.Extensions.Result;
 using DocumentFormat.OpenXml.Spreadsheet;
-using DomainCommonExtensions.CommonExtensions;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.WorkXCore.Enums;
 using DynamicExcelProvider.WorkXCore.Helpers.Resources;
+using RzR.Extensions.Domain.Primitives;
+using RzR.ResultMessage;
+using RzR.ResultMessage.Abstractions;
+using RzR.ResultMessage.Extensions.Result;
 using System;
+using System.Globalization;
 
 #endregion
 
@@ -55,9 +55,9 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
         {
             try
             {
-                if (value.IsNull())
+                if (value.IsNullOrDbNull())
                 {
-                    if (defaultValue.IsNotNull())
+                    if (defaultValue.IsNullOrDbNull().IsFalse())
                     {
                         var castDefaultValue = defaultValue.CastObjectToCellValue(sourceCellDataType);
 
@@ -93,13 +93,22 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
             {
                 return sourceCellDataType switch
                 {
-                    SourceCellDataType.DateTime => Result<CellValue>.Success(new CellValue((DateTime)value)),
-                    SourceCellDataType.String => Result<CellValue>.Success(new CellValue((string)value)),
-                    SourceCellDataType.Decimal => Result<CellValue>.Success(new CellValue((decimal)value)),
-                    SourceCellDataType.Long => Result<CellValue>.Success(new CellValue((int)value)),
-                    SourceCellDataType.Int => Result<CellValue>.Success(new CellValue((int)value)),
-                    SourceCellDataType.Short => Result<CellValue>.Success(new CellValue((int)value)),
-                    SourceCellDataType.Boolean => Result<CellValue>.Success(new CellValue((bool)value)),
+                    SourceCellDataType.DateTime 
+                        => Result<CellValue>.Success(new CellValue(Convert.ToDateTime(value, CultureInfo.InvariantCulture))),
+                    SourceCellDataType.String 
+                        => Result<CellValue>.Success(new CellValue(Convert.ToString(value, CultureInfo.InvariantCulture))),
+                    SourceCellDataType.Decimal
+                        => Result<CellValue>.Success(new CellValue(Convert.ToDecimal(value, CultureInfo.InvariantCulture))),
+                    SourceCellDataType.Float
+                        => Result<CellValue>.Success(new CellValue(Convert.ToDouble(value, CultureInfo.InvariantCulture))),
+                    SourceCellDataType.Long 
+                        => Result<CellValue>.Success(new CellValue(Convert.ToDecimal(value, CultureInfo.InvariantCulture))),
+                    SourceCellDataType.Int 
+                        => Result<CellValue>.Success(new CellValue(Convert.ToInt32(value, CultureInfo.InvariantCulture))),
+                    SourceCellDataType.Short
+                        => Result<CellValue>.Success(new CellValue(Convert.ToInt32(value, CultureInfo.InvariantCulture))),
+                    SourceCellDataType.Boolean
+                        => Result<CellValue>.Success(new CellValue(Convert.ToBoolean(value, CultureInfo.InvariantCulture))),
                     _ => Result<CellValue>.Failure(string.Format(MessagesInfo.InvalidDataSourceType, sourceCellDataType))
                 };
             }
@@ -108,5 +117,19 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
                 return Result<CellValue>.Failure(e.Message).WithError(e);
             }
         }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     An object extension method that determines whether the supplied value represents a missing
+        ///     value. Values coming from a <see cref="System.Data.DataTable" /> use
+        ///     <see cref="DBNull.Value" /> instead of a CLR null reference, so both forms are treated the
+        ///     same way.
+        /// </summary>
+        /// <param name="value">The value to act on.</param>
+        /// <returns>
+        ///     True if the value is null or <see cref="DBNull.Value" />, false if not.
+        /// </returns>
+        /// =================================================================================================
+        private static bool IsNullOrDbNull(this object value) => value.IsNull() || value.IsDbNull();
     }
 }

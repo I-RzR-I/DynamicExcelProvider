@@ -16,9 +16,9 @@
 
 #region U S A G E S
 
-using DomainCommonExtensions.CommonExtensions;
 using DynamicExcelProvider.Extensions;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
+using RzR.Extensions.Domain.Primitives;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -112,10 +112,18 @@ namespace DynamicExcelProvider.Helpers.DataTable
                 var columnInfo = _generalTableData.FirstOrDefault(x => x.CommonName == item.CommonName);
                 if (columnInfo.IsNull()) continue;
                 {
-                    var dataType = DataTypeHelper.GetColumnType(columnInfo!.DataType, columnInfo.IsNullable);
                     var data = record.FirstOrDefault(x => x.Name == item.TranslateName)?.Value;
-                    var convertedData = Convert.ChangeType(data, dataType);
-                    row[idx] = convertedData;
+
+                    if (data.IsNull() || data.IsDbNull())
+                    {
+                        row[idx] = DBNull.Value;
+                    }
+                    else
+                    {
+                        var dataType = DataTypeHelper.GetColumnType(columnInfo!.DataType, columnInfo.IsNullable);
+                        row[idx] = Convert.ChangeType(data, dataType);
+                    }
+
                     idx++;
                 }
             }
