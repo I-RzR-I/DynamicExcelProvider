@@ -16,8 +16,8 @@
 
 #region U S A G E S
 
-using DomainCommonExtensions.CommonExtensions.TypeParam;
 using DynamicExcelProvider.Helpers;
+using RzR.Extensions.Domain.Reflection.TypeParam;
 
 #endregion
 
@@ -35,8 +35,11 @@ namespace DynamicExcelProvider.Models.Request
         ///     Gets or sets a value indicating whether the apply maximum row number policy.
         ///     If the rule is applied, the maximum number of rows will be 1mln.
         ///     All data sets will be sliced ​​into multiple sheets with the maximum number of rows.
+        ///     The suffix is one based and is appended only when the data set is sliced, a data set that
+        ///     fits in a single sheet keeps the requested sheet name unchanged.
         ///     <code>
         ///            Product sheet with 2 mln rows => Product_1, Product_2
+        ///            Product sheet with 10 rows => Product
         ///     </code>
         /// </summary>
         /// <value>

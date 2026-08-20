@@ -17,9 +17,9 @@
 #region U S A G E S
 
 using DocumentFormat.OpenXml.Spreadsheet;
-using DomainCommonExtensions.ArraysExtensions;
-using DomainCommonExtensions.CommonExtensions.TypeParam;
-using DomainCommonExtensions.DataTypeExtensions;
+using RzR.Extensions.Domain.Collections;
+using RzR.Extensions.Domain.Primitives;
+using RzR.Extensions.Domain.Reflection.TypeParam;
 using System.Collections.Generic;
 using System.Linq;
 

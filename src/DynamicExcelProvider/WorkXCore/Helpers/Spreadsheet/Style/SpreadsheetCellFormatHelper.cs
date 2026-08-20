@@ -17,11 +17,12 @@
 #region U S A G E S
 
 using DocumentFormat.OpenXml.Spreadsheet;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.WorkXCore.Enums;
 using DynamicExcelProvider.WorkXCore.Extensions;
 using DynamicExcelProvider.WorkXCore.Extensions.DataType;
 using DynamicExcelProvider.WorkXCore.Models;
+using RzR.Extensions.Domain.Primitives;
+using RzR.Extensions.Domain.Text;
 using System.Collections.Generic;
 
 #endregion

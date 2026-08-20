@@ -31,13 +31,13 @@ namespace WorkXCoreFuncTests
         [DataRow(0, false)]
         [DataRow(1, true)]
         [DataRow(10, true)]
-        public static void CastIntToBool(int source, bool excepted)
+        public void CastIntToBool(int source, bool excepted)
         {
             Assert.AreEqual(source.RExtWxCToBool(), excepted);
         }
 
         [TestMethod]
-        public static void CastIntToBoolException()
+        public void CastIntToBoolException()
         {
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => (-1).RExtWxCToBool());
         }
@@ -46,13 +46,13 @@ namespace WorkXCoreFuncTests
         [DataRow(0, false)]
         [DataRow(1, true)]
         [DataRow(10, true)]
-        public static void CastNullableIntToBool(int? source, bool excepted)
+        public void CastNullableIntToBool(int? source, bool excepted)
         {
             Assert.AreEqual(source.RExtWxCToBool(), excepted);
         }
 
         [TestMethod]
-        public static void CastNullableIntToBoolException()
+        public void CastNullableIntToBoolException()
         {
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => ((int?)-1).RExtWxCToBool());
         }

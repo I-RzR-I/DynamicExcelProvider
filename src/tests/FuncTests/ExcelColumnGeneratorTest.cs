@@ -14,7 +14,6 @@
 //  </summary>
 // ***********************************************************************
 
-using DomainCommonExtensions.CommonExtensions;
 using DynamicExcelProvider.WorkXCore.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -40,7 +39,6 @@ namespace WorkXCoreFuncTests
         {
             var ex = index.GetExcelColumnName();
 
-            Assert.IsTrue(ex.IsNotNull());
             Assert.IsTrue(ex.IsSuccess);
             Assert.AreEqual(result, ex.Response);
         }

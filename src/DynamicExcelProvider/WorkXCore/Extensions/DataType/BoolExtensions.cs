@@ -16,7 +16,7 @@
 
 #region U S A G E S
 
-using DomainCommonExtensions.DataTypeExtensions;
+using RzR.Extensions.Domain.Primitives;
 using System.Runtime.CompilerServices;
 
 #endregion

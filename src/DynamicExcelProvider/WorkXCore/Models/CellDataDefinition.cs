@@ -16,10 +16,9 @@
 
 #region U S A G E S
 
-using DomainCommonExtensions.CommonExtensions;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.WorkXCore.Enums;
 using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet;
+using RzR.Extensions.Domain.Primitives;
 using System;
 using System.Collections.Generic;
 

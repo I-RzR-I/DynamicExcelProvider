@@ -19,7 +19,6 @@ using GeneralDocumentGeneratorTests.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.WorkXCore.Enums;
 using DynamicExcelProvider.WorkXCore.Models;
 using System.Collections.Generic;
@@ -27,6 +26,7 @@ using System.Linq;
 using DynamicExcelProvider.Enums;
 using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Template;
+using RzR.Extensions.Domain.Primitives;
 
 namespace GeneralDocumentGeneratorTests
 {
@@ -52,7 +52,7 @@ namespace GeneralDocumentGeneratorTests
             fs.Write(bytesArray.Response);
 
             Assert.IsNotNull(fs);
-            Assert.IsNotNull(fs.Length > 0);
+            Assert.IsTrue(fs.Length > 0);
         }
 
         [DataRow(1048)]
@@ -74,7 +74,7 @@ namespace GeneralDocumentGeneratorTests
             fs.Write(ms.ToArray());
 
             Assert.IsNotNull(fs);
-            Assert.IsNotNull(fs.Length > 0);
+            Assert.IsTrue(fs.Length > 0);
         }
 
         [DataRow(1048)]
@@ -96,7 +96,7 @@ namespace GeneralDocumentGeneratorTests
             fs.Write(ms.ToArray());
 
             Assert.IsNotNull(fs);
-            Assert.IsNotNull(fs.Length > 0);
+            Assert.IsTrue(fs.Length > 0);
         }
 
         [DataRow(1048)]
@@ -124,7 +124,7 @@ namespace GeneralDocumentGeneratorTests
             fs.Write(ms.ToArray());
 
             Assert.IsNotNull(fs);
-            Assert.IsNotNull(fs.Length > 0);
+            Assert.IsTrue(fs.Length > 0);
         }
 
         [TestMethod]
