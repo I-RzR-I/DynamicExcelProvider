@@ -16,19 +16,19 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage;
-using AggregatedGenericResultMessage.Abstractions;
-using AggregatedGenericResultMessage.Extensions.Result;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using DomainCommonExtensions.ArraysExtensions;
-using DomainCommonExtensions.CommonExtensions;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.WorkXCore.Extensions;
+using DynamicExcelProvider.WorkXCore.Helpers.Resources;
 using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet;
 using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style;
 using DynamicExcelProvider.WorkXCore.Models;
+using RzR.Extensions.Domain.Collections;
+using RzR.Extensions.Domain.Primitives;
+using RzR.ResultMessage;
+using RzR.ResultMessage.Abstractions;
+using RzR.ResultMessage.Extensions.Result;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -85,9 +85,18 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
         public IResult Write(string filePath, WorkbookDefinition workBook)
         {
             filePath = filePath ?? Path.Combine(_rootFolder, $"{Guid.NewGuid():N}.xlsx");
-            using var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
 
-            return Write(fs, workBook);
+            using var ms = new MemoryStream();
+
+            var writeResult = Write(ms, workBook);
+            if (writeResult.IsSuccess.IsFalse()) return writeResult;
+
+            using var fs = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
+
+            ms.Position = 0;
+            ms.CopyTo(fs);
+
+            return writeResult;
         }
 
         /// -------------------------------------------------------------------------------------------------
@@ -105,56 +114,57 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
         {
             try
             {
-                if (workBook.Worksheets.IsNotNull() && workBook.Worksheets.IsNullOrEmptyEnumerable().IsFalse())
+                if (workBook.Worksheets.IsNullOrEmptyEnumerable())
+                    return Result.Failure(MessagesInfo.WorkbookWithoutWorksheets);
+
+                var sheetValidation = workBook.Worksheets.Select(x => x.Name).ValidateSheetsName();
+                if (sheetValidation.IsSuccess.IsFalse())
+                    return Result.Failure(sheetValidation.ToBase().GetFirstMessage());
+
+                using (var exDocument = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook /*, true*/))
                 {
-                    var sheetValidation = workBook.Worksheets.Select(x => x.Name).ValidateSheetsName();
-                    if (sheetValidation.IsSuccess.IsFalse())
-                        return Result.Failure(sheetValidation.ToBase().GetFirstMessage());
+                    // Add a WorkbookPart to the document.
+                    var workbookPart = exDocument.AddWorkbookPart();
+                    workbookPart.Workbook = new Workbook();
 
-                    using (var exDocument = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook /*, true*/))
+                    // Add style
+                    var stylePart = workbookPart.AddNewPart<WorkbookStylesPart>();
+                    stylePart.Stylesheet = new Stylesheet(
+                        SpreadsheetCustomDataFormatHelper.GenerateNumberingFormat(),
+                        SpreadsheetFontHelper.Instance.GenerateFonts(),
+                        SpreadsheetFillHelper.Instance.GenerateFills(),
+                        SpreadsheetBorderHelper.Instance.GenerateBorders(),
+                        new SpreadsheetCellFormatHelper().GenerateCellFormats(GetAllSheetCellDefinitions(workBook.Worksheets)),
+                        SpreadsheetColumnHelper.Instance.GenerateColumns());
+
+                    // Save style sheet
+                    stylePart.Stylesheet.Save();
+
+                    // Save workbook part
+                    workbookPart.Workbook.Save();
+
+                    // Add Sheets to the Workbook.
+                    var sheets = exDocument.WorkbookPart?.Workbook.AppendChild(new Sheets());
+
+                    foreach (var worksheet in workBook.Worksheets.WithIndex())
                     {
-                        // Add a WorkbookPart to the document.
-                        var workbookPart = exDocument.AddWorkbookPart();
-                        workbookPart.Workbook = new Workbook();
+                        // Add a WorksheetPart to the WorkbookPart.
+                        var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+                        var sheetData = new SheetData();
+                        worksheetPart.Worksheet = new Worksheet(sheetData);
 
-                        // Add style
-                        var stylePart = workbookPart.AddNewPart<WorkbookStylesPart>();
-                        stylePart.Stylesheet = new Stylesheet(
-                            SpreadsheetCustomDataFormatHelper.GenerateNumberingFormat(),
-                            SpreadsheetFontHelper.Instance.GenerateFonts(),
-                            SpreadsheetFillHelper.Instance.GenerateFills(),
-                            SpreadsheetBorderHelper.Instance.GenerateBorders(),
-                            new SpreadsheetCellFormatHelper().GenerateCellFormats(GetAllSheetCellDefinitions(workBook.Worksheets)),
-                            SpreadsheetColumnHelper.Instance.GenerateColumns());
-                        
-                        // Save style sheet
-                        stylePart.Stylesheet.Save();
+                        var sheet = exDocument.AddWorksheet(workbookPart, worksheetPart, worksheet, sheetData);
 
-                        // Save workbook part
-                        workbookPart.Workbook.Save();
+                        if (sheet.IsSuccess.IsFalse()) 
+                            return Result.Failure(sheet.GetFirstMessage());
 
-                        // Add Sheets to the Workbook.
-                        var sheets = exDocument.WorkbookPart?.Workbook.AppendChild(new Sheets());
+                        sheets?.Append(sheet.Response);
 
-                        foreach (var worksheet in workBook.Worksheets.WithIndex())
-                        {
-                            // Add a WorksheetPart to the WorkbookPart.
-                            var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
-                            var sheetData = new SheetData();
-                            worksheetPart.Worksheet = new Worksheet(sheetData);
-
-                            var sheet = exDocument.AddWorksheet(workbookPart, worksheetPart, worksheet, sheetData);
-
-                            if (sheet.IsSuccess.IsFalse()) return Result.Failure(sheet.GetFirstMessage());
-
-                            sheets?.Append(sheet.Response);
-                            
-                            if (worksheet.item.SheetValidations.IsNullOrEmptyEnumerable().IsFalse() && appendSheetValidations.IsTrue())
-                                worksheetPart.Worksheet.AppendChild(worksheet.item.SheetValidations);
-                        }
-
-                        SpreadsheetCellFormatHelper.DisposeObjects();
+                        if (worksheet.item.SheetValidations.IsNullOrEmptyEnumerable().IsFalse() && appendSheetValidations.IsTrue())
+                            worksheetPart.Worksheet.AppendChild((DataValidations)worksheet.item.SheetValidations.CloneNode(true));
                     }
+
+                    SpreadsheetCellFormatHelper.DisposeObjects();
                 }
 
                 return Result.Success();

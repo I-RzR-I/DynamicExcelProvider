@@ -38,5 +38,8 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Resources
 
         /// <summary>(Immutable) the invalid in to bool.</summary>
         internal const string InvalidInToToBool = "Source data must be greater than 0!";
+
+        /// <summary>(Immutable) the workbook without worksheets.</summary>
+        internal const string WorkbookWithoutWorksheets = "Workbook contains no worksheets; nothing was written.";
     }
 }
