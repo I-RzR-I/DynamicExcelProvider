@@ -1,4 +1,4 @@
-From the beginning to use available functionalities, u must install the package
+﻿From the beginning to use available functionalities, u must install the package
 
 > `Install-Package DynamicExcelProvider -Version x.x.x.x`
 
@@ -39,13 +39,15 @@ Task<IResult<byte[]>> GenerateCsvFromKnownAsync(
             IReadOnlyCollection<PropModel> embeddedModelCollection,
             IReadOnlyCollection<PropTranslateModel> availablePropInOutput, 
             IEnumerable<IReadOnlyList<PropNameValue>> data, 
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default,
+            Encoding encoding = null);
             
 Task<IResult<byte[]>> GenerateCsvAsync<TDataModel>(
             IReadOnlyCollection<PropModel> embeddedModelCollection,
             IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
             IReadOnlyCollection<TDataModel> data, 
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken = default,
+            Encoding encoding = null);
             
 Task<IResult<byte[]>> GenerateAsync<TDataModel>(
             IReadOnlyCollection<TDataModel> data,
@@ -85,6 +87,8 @@ Task<IResult> GenerateAsync(
             WorkbookDefinition workBook, 
             CancellationToken cancellationToken = default);
 ```
+
+The CSV methods accept an optional `encoding`. When it is left `null` the library keeps its historical default, `ISO-8859-1`, which is what Excel on Windows expects when a `.csv` is opened by double-click. That code page cannot represent characters outside Latin-1 (for example the Romanian `ș` or the `€` sign) and replaces them with `?`, so pass `Encoding.UTF8` when the exported text needs them.
 
 For more flexibility in the new file generation was added header table style and cell styles like: `Bold`, `Italic`, `WrapText`, `HorizontalAlignment`, `VerticalAlignment`, `CellDataType`, `SourceCellDataType`, `FormatCode`.
 
