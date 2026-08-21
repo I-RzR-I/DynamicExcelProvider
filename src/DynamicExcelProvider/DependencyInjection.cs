@@ -16,7 +16,6 @@
 
 #region U S A G E S
 
-using DomainCommonExtensions.CommonExtensions;
 using DynamicExcelProvider.Abstractions;
 using DynamicExcelProvider.Helpers;
 using DynamicExcelProvider.Models.Request;
@@ -24,6 +23,7 @@ using DynamicExcelProvider.Providers;
 using DynamicExcelProvider.WorkXCore.Abstractions;
 using DynamicExcelProvider.WorkXCore.Services;
 using Microsoft.Extensions.DependencyInjection;
+using RzR.Extensions.Domain.Primitives;
 using System;
 
 // ReSharper disable UnusedMethodReturnValue.Local
@@ -85,28 +85,20 @@ namespace DynamicExcelProvider
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
         ///     Sets provider options.
+        ///     The option instance always carries the defaults, so an absent delegate registers the same
+        ///     configuration as an empty one, and a later registration always overwrites an earlier one.
         /// </summary>
         /// <param name="writeOption">The write option.</param>
         /// =================================================================================================
         private static void SetProviderOptions(Action<ExcelWriteProviderOption> writeOption)
         {
-            /*
-            writeOption = writeOption.IfIsNull(o =>
-            {
-                o.ApplyMaxColumnNumberPolicy = true;
-                o.ApplyMaxRowNumberPolicy = true;
-                o.SheetMaxNumberOfRows = ProviderInitInfo.DefaultMaxRowNumber;
-            });
-            */
+            var wOption = new ExcelWriteProviderOption();
 
             if (writeOption.IsNotNull())
-            {
-                var wOption = new ExcelWriteProviderOption();
                 writeOption!(wOption);
 
-                ProviderInitInfo.SetMaxRowNumberPolicyRule(wOption.ApplyMaxRowNumberPolicy);
-                ProviderInitInfo.SetSheetMaxNumberOfRows(wOption.SheetMaxNumberOfRows);
-            }
+            ProviderInitInfo.SetMaxRowNumberPolicyRule(wOption.ApplyMaxRowNumberPolicy);
+            ProviderInitInfo.SetSheetMaxNumberOfRows(wOption.SheetMaxNumberOfRows);
         }
     }
 }

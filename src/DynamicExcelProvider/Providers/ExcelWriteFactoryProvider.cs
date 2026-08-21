@@ -16,10 +16,6 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage;
-using AggregatedGenericResultMessage.Abstractions;
-using AggregatedGenericResultMessage.Extensions.Result.Messages;
-using DomainCommonExtensions.Utilities.Ensure;
 using DynamicExcelProvider.Abstractions;
 using DynamicExcelProvider.Helpers;
 using DynamicExcelProvider.Models.Request.Configuration;
@@ -27,10 +23,15 @@ using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Export;
 using DynamicExcelProvider.WorkXCore.Abstractions;
 using DynamicExcelProvider.WorkXCore.Models;
+using RzR.Extensions.Domain.Validation;
+using RzR.ResultMessage;
+using RzR.ResultMessage.Abstractions;
+using RzR.ResultMessage.Extensions.Result.Messages;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -220,12 +221,14 @@ namespace DynamicExcelProvider.Providers
         public async Task<IResult<byte[]>> GenerateCsvFromKnownAsync(
             IReadOnlyCollection<PropModel> embeddedModelCollection,
             IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
-            IEnumerable<IReadOnlyList<PropNameValue>> data, CancellationToken cancellationToken = default)
+            IEnumerable<IReadOnlyList<PropNameValue>> data,
+            CancellationToken cancellationToken = default, Encoding encoding = null)
         {
             try
             {
                 var byteData = await Task.Run(
-                    () => DocGenerateParserHelper.GenerateCsv(embeddedModelCollection, availablePropInOutput, data), cancellationToken);
+                    () => DocGenerateParserHelper.GenerateCsv(embeddedModelCollection, availablePropInOutput, data, encoding),
+                    cancellationToken);
 
                 return byteData;
             }
@@ -241,12 +244,13 @@ namespace DynamicExcelProvider.Providers
         public async Task<IResult<byte[]>> GenerateCsvAsync<TDataModel>(
             IReadOnlyCollection<PropModel> embeddedModelCollection,
             IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
-            IReadOnlyCollection<TDataModel> data, CancellationToken cancellationToken = default) where TDataModel : class
+            IReadOnlyCollection<TDataModel> data,
+            CancellationToken cancellationToken = default, Encoding encoding = null) where TDataModel : class
         {
             try
             {
                 var byteData = await Task.Run(() => DocGenerateParserHelper.GenerateCsv(embeddedModelCollection,
-                    availablePropInOutput, data), cancellationToken);
+                    availablePropInOutput, data, encoding), cancellationToken);
 
                 return byteData;
             }

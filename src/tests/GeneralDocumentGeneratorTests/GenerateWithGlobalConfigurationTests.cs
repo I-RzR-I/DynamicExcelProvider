@@ -116,7 +116,7 @@ namespace GeneralDocumentGeneratorTests
             fs.Write(data.Response);
 
             Assert.IsNotNull(fs);
-            Assert.IsNotNull(fs.Length > 0);
+            Assert.IsTrue(fs.Length > 0);
         }
     }
 }

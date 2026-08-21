@@ -16,10 +16,11 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage.Abstractions;
 using DynamicExcelProvider.WorkXCore.Abstractions;
 using DynamicExcelProvider.WorkXCore.Helpers;
 using DynamicExcelProvider.WorkXCore.Models;
+using RzR.Extensions.Domain.Validation;
+using RzR.ResultMessage.Abstractions;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,20 +44,16 @@ namespace DynamicExcelProvider.WorkXCore.Services
         /// <inheritdoc/>
         public IResult WriteFile(string filePath, WorkbookDefinition workBook)
         {
-            using var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            DomainEnsure.IsNotNullOrEmptyArgNull(filePath, nameof(filePath));
 
-            return WriteFile(fs, workBook);
+            return SpreadsheetDocumentHelper.Instance.Write(filePath, workBook);
         }
 
         /// <inheritdoc/>
         public virtual async Task<IResult> WriteFileAsync(
             string filePath, WorkbookDefinition workBook,
             CancellationToken cancellationToken = default)
-        {
-            using var fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-
-            return await WriteFileAsync(fs, workBook, cancellationToken);
-        }
+            => await Task.Run(() => WriteFile(filePath, workBook), cancellationToken);
 
         /// <inheritdoc/>
         public IResult WriteFile(Stream stream, WorkbookDefinition workBook)

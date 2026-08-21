@@ -16,12 +16,6 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage;
-using AggregatedGenericResultMessage.Abstractions;
-using AggregatedGenericResultMessage.Extensions.Result.Messages;
-using DomainCommonExtensions.ArraysExtensions;
-using DomainCommonExtensions.CommonExtensions;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.Extensions;
 using DynamicExcelProvider.Helpers.Attributes;
 using DynamicExcelProvider.Models.Internal;
@@ -29,6 +23,11 @@ using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Configuration.Template;
 using DynamicExcelProvider.WorkXCore.Models;
+using RzR.Extensions.Domain.Collections;
+using RzR.Extensions.Domain.Primitives;
+using RzR.ResultMessage;
+using RzR.ResultMessage.Abstractions;
+using RzR.ResultMessage.Extensions.Result.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,7 +92,8 @@ namespace DynamicExcelProvider.Helpers
                         Format = p.FormatCode,
                         IsItalic = p.IsItalic,
                         IsBold = p.IsBold,
-                        WrapText = p.WrapText
+                        WrapText = p.WrapText,
+                        Width = p.Width
                     });
                 }
 
@@ -163,7 +163,8 @@ namespace DynamicExcelProvider.Helpers
                         Format = p.FormatCode,
                         IsItalic = p.IsItalic,
                         IsBold = p.IsBold,
-                        WrapText = p.WrapText
+                        WrapText = p.WrapText,
+                        Width = p.Width
                     });
                 }
 
@@ -224,6 +225,7 @@ namespace DynamicExcelProvider.Helpers
                         IsItalic = x.IsItalic,
                         IsBold = x.IsBold,
                         WrapText = x.WrapText,
+                        Width = x.Width,
                         CellData = new CellDataDefinition
                         {
                             //CellDataType = DataTypeHelper.GetColumnType(embeddedModelCollection
@@ -232,13 +234,10 @@ namespace DynamicExcelProvider.Helpers
                             //    .FirstOrDefault(a => a.CommonName == x.CommonName)?.DataType),
                             CellDataType = DataTypeHelper.GetColumnType(eModelCollection[x.CommonName]),
                             SourceCellDataType = DataTypeHelper.GetSourceColumnType(eModelCollection[x.CommonName]),
-                            FormatCode = x.Format ?? "0"
+                            FormatCode = x.Format ?? "General"
                         }
-                    });
-
-                var sheetValidations = generateSheetValidations.IsTrue()
-                    ? DataValidationsBuildHelper.BuildSheetDataValidations(ref props, ref outputProps)
-                    : null;
+                    })
+                    .ToList();
 
                 var wbDef = new WorkbookDefinition()
                 {
@@ -247,17 +246,24 @@ namespace DynamicExcelProvider.Helpers
 
                 if (ProviderInitInfo.ApplyMaxRowNumberPolicy.IsTrue())
                 {
-                    var worksheets = new List<WorksheetDefinition>();
-                    var tmpData = data.Chunked(ProviderInitInfo.SheetMaxNumberOfRows);
+                    var chunks = data.Chunked(ProviderInitInfo.SheetMaxNumberOfRows).ToList();
+                    if (chunks.Count == 0)
+                        chunks.Add(Enumerable.Empty<TResult>());
 
-                    for (var i = 0; i < tmpData.Count(); i++)
+                    var worksheets = new List<WorksheetDefinition>(chunks.Count);
+                    for (var i = 0; i < chunks.Count; i++)
                     {
-                        var rows = BuildWorksheetDefinitionRows(outputProps, tmpData.ElementAt(i), props, isDynamic);
+                        // Every worksheet needs its own validations instance, an OpenXml element
+                        // can be appended to a single parent only.
+                        var sheetValidations = generateSheetValidations.IsTrue()
+                            ? DataValidationsBuildHelper.BuildSheetDataValidations(ref props, ref outputProps)
+                            : null;
+
                         worksheets.Add(new WorksheetDefinition()
                         {
-                            Name = sheetName.RExtToCleanSheetName($"_{i}"),
+                            Name = sheetName.RExtToCleanSheetName(chunks.Count > 1 ? $"_{i + 1}" : string.Empty),
                             ColumnHeadings = columnHeadings,
-                            Rows = rows,
+                            Rows = BuildWorksheetDefinitionRows(outputProps, chunks[i], props, isDynamic),
                             SheetValidations = sheetValidations
                         });
                     }
@@ -266,11 +272,15 @@ namespace DynamicExcelProvider.Helpers
                 }
                 else
                 {
+                    var sheetValidations = generateSheetValidations.IsTrue()
+                        ? DataValidationsBuildHelper.BuildSheetDataValidations(ref props, ref outputProps)
+                        : null;
+
                     wbDef.Worksheets = new List<WorksheetDefinition>(1)
                     {
                         new WorksheetDefinition()
                         {
-                            Name = sheetName,
+                            Name = sheetName.RExtToCleanSheetName(),
                             ColumnHeadings = columnHeadings,
                             Rows = BuildWorksheetDefinitionRows(outputProps, data, props, isDynamic),
                             SheetValidations = sheetValidations
@@ -320,13 +330,15 @@ namespace DynamicExcelProvider.Helpers
                         IsItalic = x.IsItalic,
                         IsBold = x.IsBold,
                         WrapText = x.WrapText,
+                        Width = x.Width,
                         CellData = new CellDataDefinition
                         {
                             CellDataType = DataTypeHelper.GetColumnType(eModelCollection[x.CommonName]),
                             SourceCellDataType = DataTypeHelper.GetSourceColumnType(eModelCollection[x.CommonName]),
-                            FormatCode = x.Format ?? "0"
+                            FormatCode = x.Format ?? "General"
                         }
-                    });
+                    })
+                    .ToList();
 
                 var wbDef = new WorkbookDefinition()
                 {
@@ -335,17 +347,18 @@ namespace DynamicExcelProvider.Helpers
 
                 if (ProviderInitInfo.ApplyMaxRowNumberPolicy.IsTrue())
                 {
-                    var worksheets = new List<WorksheetDefinition>();
-                    var tmpData = data.Chunked(ProviderInitInfo.SheetMaxNumberOfRows);
+                    var chunks = data.Chunked(ProviderInitInfo.SheetMaxNumberOfRows).ToList();
+                    if (chunks.Count == 0)
+                        chunks.Add(Enumerable.Empty<IReadOnlyCollection<PropNameValue>>());
 
-                    for (var i = 0; i < tmpData.Count(); i++)
+                    var worksheets = new List<WorksheetDefinition>(chunks.Count);
+                    for (var i = 0; i < chunks.Count; i++)
                     {
-                        var rows = BuildWorksheetDefinitionRows(outputProps, tmpData.ElementAt(i));
                         worksheets.Add(new WorksheetDefinition()
                         {
-                            Name = sheetName.RExtToCleanSheetName($"_{i}"),
+                            Name = sheetName.RExtToCleanSheetName(chunks.Count > 1 ? $"_{i + 1}" : string.Empty),
                             ColumnHeadings = columnHeadings,
-                            Rows = rows
+                            Rows = BuildWorksheetDefinitionRows(outputProps, chunks[i])
                         });
                     }
 
@@ -357,7 +370,7 @@ namespace DynamicExcelProvider.Helpers
                     {
                         new WorksheetDefinition()
                         {
-                            Name = sheetName,
+                            Name = sheetName.RExtToCleanSheetName(),
                             ColumnHeadings = columnHeadings,
                             Rows = BuildWorksheetDefinitionRows(outputProps, data)
                         }
@@ -399,7 +412,7 @@ namespace DynamicExcelProvider.Helpers
                     {
                         new WorksheetDefinition
                         {
-                            Name = sheetName,
+                            Name = sheetName.RExtToCleanSheetName(),
                             ColumnHeadings = columnHeadings,
                             Rows = new List<RowDefinition>(),
                             SheetValidations =

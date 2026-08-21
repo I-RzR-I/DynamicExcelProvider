@@ -58,7 +58,7 @@ namespace WorkXCoreFuncTests
         [DataRow("Name1", "Name1")]
         [DataRow("Name:1", "Name1")]
         [DataRow("sheet1!", "sheet1!")]
-        [DataRow("sheet1*&!", "sheet1!")]
+        [DataRow("sheet1*&!", "sheet1&!")]
         [TestMethod]
         public void ToSafeSheetName_Test(string brutName, string netName)
         {
@@ -71,9 +71,9 @@ namespace WorkXCoreFuncTests
         [DataRow("Name1", "Name1_9")]
         [DataRow("Name:1", "Name1_9")]
         [DataRow("sheet1!", "sheet1!_9")]
-        [DataRow("sheet1*&!", "sheet1!_9")]
-        [DataRow("sheet1*$&!", "sheet1$!_9")]
-        [DataRow("sheet1*$&.!", "sheet1$.!_9")]
+        [DataRow("sheet1*&!", "sheet1&!_9")]
+        [DataRow("sheet1*$&!", "sheet1$&!_9")]
+        [DataRow("sheet1*$&.!", "sheet1$&.!_9")]
         [TestMethod]
         public void ToSafeSheetName_WithReplace_Test(string brutName, string netName)
         {

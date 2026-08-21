@@ -1,3 +1,14 @@
+### **v3.0.0.7667** [[RzR](mailto:108324929+I-RzR-I@users.noreply.github.com)] 21-08-2026
+* [c156822] (RzR) -> Auto commit uncommited files
+* [9352925] (RzR) -> Add configurable column width and emit it into the worksheet.
+* [12d5ad0] (RzR) -> Fix culture resolution failing under globalization-invariant mode.
+* [a2727ff] (RzR) -> Add content level assertions over generated documents.
+* [ede3339] (RzR) -> Harden CSV output and expose the output encoding.
+* [ee26063] (RzR) -> Fix file write truncation and empty workbook handling.
+* [4c5e4f1] (RzR) -> Fix numeric type mapping and DBNull handling.
+* [0d80d2c] (RzR) -> Fix sheet naming, row-limit policy default and number format.
+* [7b6bc32] (RzR) -> Upgrade reference packages version, migrate namespaces and fix errors.
+
 ### **v2.1.0.4942** [[RzR](mailto:108324929+I-RzR-I@users.noreply.github.com)] 28-10-2025
 * [d6fb76f] (RzR) -> Auto commit uncommited files
 * [74ebbfa] (RzR) -> Fix project name in scripts.

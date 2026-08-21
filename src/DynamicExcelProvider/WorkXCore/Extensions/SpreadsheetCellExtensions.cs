@@ -16,16 +16,16 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage;
-using AggregatedGenericResultMessage.Abstractions;
-using AggregatedGenericResultMessage.Extensions.Result;
 using DocumentFormat.OpenXml.Spreadsheet;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.WorkXCore.Extensions.DataType;
 using DynamicExcelProvider.WorkXCore.Helpers;
 using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet;
 using DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style;
 using DynamicExcelProvider.WorkXCore.Models;
+using RzR.Extensions.Domain.Primitives;
+using RzR.ResultMessage;
+using RzR.ResultMessage.Abstractions;
+using RzR.ResultMessage.Extensions.Result;
 using System;
 
 #endregion

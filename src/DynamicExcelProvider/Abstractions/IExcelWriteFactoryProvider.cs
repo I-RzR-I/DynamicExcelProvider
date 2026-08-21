@@ -16,14 +16,15 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage.Abstractions;
 using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Export;
 using DynamicExcelProvider.WorkXCore.Models;
+using RzR.ResultMessage.Abstractions;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -173,6 +174,13 @@ namespace DynamicExcelProvider.Abstractions
         ///     Available export properties which will be present in result file.
         /// </param>
         /// <param name="data">Custom properties with there values in array of array.</param>
+        /// <param name="encoding">
+        ///     (Optional) Encoding used to render the returned CSV bytes. When <see langword="null" />, the
+        ///     library default (<c>ISO-8859-1</c>) is used. That default cannot represent characters outside
+        ///     Latin-1 (for example the Romanian 'ș' or the '€' sign); they are irreversibly replaced by
+        ///     '?'. Callers exporting text outside Latin-1 must pass an explicit Unicode encoding, such as
+        ///     <see cref="Encoding.UTF8" />.
+        /// </param>
         /// <param name="cancellationToken">
         ///     (Optional) A token that allows processing to be cancelled.
         /// </param>
@@ -182,7 +190,8 @@ namespace DynamicExcelProvider.Abstractions
         /// =================================================================================================
         Task<IResult<byte[]>> GenerateCsvFromKnownAsync(
             IReadOnlyCollection<PropModel> embeddedModelCollection, IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
-            IEnumerable<IReadOnlyList<PropNameValue>> data, CancellationToken cancellationToken = default);
+            IEnumerable<IReadOnlyList<PropNameValue>> data,
+            CancellationToken cancellationToken = default, Encoding encoding = null);
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
@@ -197,6 +206,13 @@ namespace DynamicExcelProvider.Abstractions
         ///     Available export properties which will be present in result file.
         /// </param>
         /// <param name="data">Available data to export.</param>
+        /// <param name="encoding">
+        ///     (Optional) Encoding used to render the returned CSV bytes. When <see langword="null" />, the
+        ///     library default (<c>ISO-8859-1</c>) is used. That default cannot represent characters outside
+        ///     Latin-1 (for example the Romanian 'ș' or the '€' sign); they are irreversibly replaced by
+        ///     '?'. Callers exporting text outside Latin-1 must pass an explicit Unicode encoding, such as
+        ///     <see cref="Encoding.UTF8" />.
+        /// </param>
         /// <param name="cancellationToken">
         ///     (Optional) A token that allows processing to be cancelled.
         /// </param>
@@ -206,7 +222,8 @@ namespace DynamicExcelProvider.Abstractions
         /// =================================================================================================
         Task<IResult<byte[]>> GenerateCsvAsync<TDataModel>(
             IReadOnlyCollection<PropModel> embeddedModelCollection, IReadOnlyCollection<PropTranslateModel> availablePropInOutput,
-            IReadOnlyCollection<TDataModel> data, CancellationToken cancellationToken = default) where TDataModel : class;
+            IReadOnlyCollection<TDataModel> data,
+            CancellationToken cancellationToken = default, Encoding encoding = null) where TDataModel : class;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>

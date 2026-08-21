@@ -16,14 +16,14 @@
 
 #region U S A G E S
 
-using DomainCommonExtensions.ArraysExtensions;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.Extensions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using RzR.Extensions.Domain.Collections;
+using RzR.Extensions.Domain.Primitives;
 
 // ReSharper disable PossibleMultipleEnumeration
 

@@ -18,15 +18,15 @@
 
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
-using DomainCommonExtensions.ArraysExtensions;
-using DomainCommonExtensions.CommonExtensions;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.Attributes;
 using DynamicExcelProvider.Enums;
 using DynamicExcelProvider.Mapper;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Configuration.Template;
 using DynamicExcelProvider.WorkXCore.Extensions;
+using RzR.Extensions.Domain.Collections;
+using RzR.Extensions.Domain.Primitives;
+using RzR.Extensions.Domain.Text;
 using System;
 using System.Collections.Generic;
 using System.Linq;

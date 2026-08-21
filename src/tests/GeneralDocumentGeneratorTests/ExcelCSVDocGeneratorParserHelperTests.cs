@@ -19,11 +19,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.Helpers;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using GeneralDocumentGeneratorTests.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RzR.Extensions.Domain.Primitives;
 
 #endregion
 
@@ -136,7 +136,7 @@ namespace GeneralDocumentGeneratorTests
             fs.Write(dataBytes.Response);
 
             Assert.IsNotNull(fs);
-            Assert.IsNotNull(fs.Length > 0);
+            Assert.IsTrue(fs.Length > 0);
         }
 
         [TestMethod]
@@ -250,7 +250,7 @@ namespace GeneralDocumentGeneratorTests
             fs.Write(dataBytes.Response);
 
             Assert.IsNotNull(fs);
-            Assert.IsNotNull(fs.Length > 0);
+            Assert.IsTrue(fs.Length > 0);
         }
     }
 }

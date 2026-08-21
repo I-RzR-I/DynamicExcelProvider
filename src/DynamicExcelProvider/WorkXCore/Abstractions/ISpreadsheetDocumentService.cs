@@ -16,8 +16,8 @@
 
 #region U S A G E S
 
-using AggregatedGenericResultMessage.Abstractions;
 using DynamicExcelProvider.WorkXCore.Models;
+using RzR.ResultMessage.Abstractions;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;

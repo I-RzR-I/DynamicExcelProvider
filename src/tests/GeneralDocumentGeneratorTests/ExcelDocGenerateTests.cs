@@ -20,13 +20,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using DomainCommonExtensions.DataTypeExtensions;
 using DynamicExcelProvider.Helpers;
 using DynamicExcelProvider.WorkXCore.Enums;
 using DynamicExcelProvider.WorkXCore.Helpers;
 using DynamicExcelProvider.WorkXCore.Models;
 using GeneralDocumentGeneratorTests.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using RzR.Extensions.Domain.Primitives;
 
 #endregion
 
