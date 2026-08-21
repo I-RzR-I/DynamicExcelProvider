@@ -1,5 +1,6 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DynamicExcelProvider.Attributes;
 using DynamicExcelProvider.Helpers;
 using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
@@ -21,7 +22,11 @@ namespace GeneralDocumentGeneratorTests
     {
         private const int NoSplitMaxRows = 1_000;
 
+        private const string GeneratedOutputFolder = "GeneratedOutput";
+
         private readonly List<string> _writtenFiles = new List<string>();
+
+        public TestContext TestContext { get; set; }
 
         [TestInitialize]
         public void ApplyExplicitProviderConfiguration()
@@ -66,6 +71,8 @@ namespace GeneralDocumentGeneratorTests
                 Assert.Fail($"Generating 5 rows into a sheet limit of {NoSplitMaxRows} must succeed. " +
                             $"Reported: {result.GetFirstMessage()}");
 
+            SaveForInspection(result.Response, "SingleChunk_NoSuffix");
+
             var sheetNames = ReadSheetNames(result.Response, "single chunk export");
 
             Assert.AreEqual(1, sheetNames.Count);
@@ -90,6 +97,8 @@ namespace GeneralDocumentGeneratorTests
 
             if (!result.IsSuccess)
                 Assert.Fail($"Generating 10 rows into sheets of 4 must succeed. Reported: {result.GetFirstMessage()}");
+
+            SaveForInspection(result.Response, "MultiChunk_OneBasedSuffixes");
 
             var sheetNames = ReadSheetNames(result.Response, "multi chunk export");
 
@@ -126,6 +135,8 @@ namespace GeneralDocumentGeneratorTests
                 Assert.Fail($"Generating {maxRowsPerSheet} rows into a sheet limit of {maxRowsPerSheet} must " +
                             $"succeed. Reported: {result.GetFirstMessage()}");
 
+            SaveForInspection(result.Response, "ExactSingleChunk");
+
             var sheetNames = ReadSheetNames(result.Response, "exact single chunk export");
 
             Assert.AreEqual(1, sheetNames.Count);
@@ -154,6 +165,8 @@ namespace GeneralDocumentGeneratorTests
                 Assert.Fail($"Generating {maxRowsPerSheet * 2} rows into sheets of {maxRowsPerSheet} must " +
                             $"succeed. Reported: {result.GetFirstMessage()}");
 
+            SaveForInspection(result.Response, "ExactTwoChunks");
+
             var sheetNames = ReadSheetNames(result.Response, "exact two chunk export");
 
             Assert.AreEqual(2, sheetNames.Count);
@@ -179,6 +192,8 @@ namespace GeneralDocumentGeneratorTests
                 Assert.Fail($"GenerateTemplate<DataTemp1>({lcid}) must succeed. Reported: {result.GetFirstMessage()}");
             Assert.IsNotNull(result.Response);
             Assert.IsTrue(result.Response.Length > 0);
+
+            SaveForInspection(result.Response, "Template_HeaderOnly");
 
             var sheetNames = ReadSheetNames(result.Response, $"GenerateTemplate<DataTemp1>({lcid})");
             Assert.AreEqual(1, sheetNames.Count);
@@ -305,6 +320,8 @@ namespace GeneralDocumentGeneratorTests
                 Assert.Fail("Generating a CSV with a comma in a column name must succeed. " +
                             $"Reported: {result.GetFirstMessage()}");
             Assert.IsTrue(result.Response.Length > 0);
+
+            SaveForInspection(result.Response, "Csv_QuotedHeader", "csv");
 
             var text = Encoding.GetEncoding("iso-8859-1").GetString(result.Response);
             var headerLine = text.Split('\n')[0].TrimEnd('\r');
@@ -479,6 +496,20 @@ namespace GeneralDocumentGeneratorTests
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), $"{prefix}_{Guid.NewGuid():N}.{extension}");
             _writtenFiles.Add(path);
+
+            return path;
+        }
+
+        private string SaveForInspection(byte[] content, string name, string extension = "xlsx")
+        {
+            var folder = Path.Combine(Directory.GetCurrentDirectory(), GeneratedOutputFolder);
+            Directory.CreateDirectory(folder);
+
+            var path = Path.Combine(folder, $"{name}.{extension}");
+            File.WriteAllBytes(path, content);
+
+            TestContext?.WriteLine($"Generated document saved to: {path}");
+            TestContext?.AddResultFile(path);
 
             return path;
         }
@@ -734,6 +765,88 @@ namespace GeneralDocumentGeneratorTests
             }
 
             return records;
+        }
+
+        public class ColumnWidthModel
+        {
+            [ExcelPropName("Ident", 1033, true, 0, width: 12)]
+            public int Id { get; set; }
+
+            [ExcelPropName("Full name", 1033, true, 1, width: 40.5)]
+            public string Name { get; set; }
+
+            [ExcelPropName("Note", 1033, true, 2)]
+            public string Note { get; set; }
+        }
+
+        [TestMethod]
+        public void Generate_WithDeclaredColumnWidths_EmitsColsInTheWorksheetBeforeSheetData()
+        {
+            ConfigureRowPolicy(true, NoSplitMaxRows);
+
+            var result = DocGenerateParserHelper.Generate(new ExcelCollectionExportConfiguration
+            {
+                Configuration = new ExcelWriteConfiguration { LCID = 1033, SheetName = "Widths" },
+                DataCollection = new List<ColumnWidthModel>
+                {
+                    new ColumnWidthModel { Id = 1, Name = "first", Note = "n" }
+                }
+            });
+
+            if (!result.IsSuccess)
+                Assert.Fail($"Exporting a model that declares column widths must succeed. " +
+                            $"Reported: {result.GetFirstMessage()}");
+
+            SaveForInspection(result.Response, "ColumnWidths_Declared");
+
+            using var ms = new MemoryStream(result.Response);
+            using var doc = SpreadsheetDocument.Open(ms, false);
+
+            var worksheetPart = doc.WorkbookPart.WorksheetParts.Single();
+            var columns = worksheetPart.Worksheet.GetFirstChild<Columns>();
+
+            if (columns == null)
+                Assert.Fail("The worksheet must carry a <cols> element when a width is declared; " +
+                            "a spreadsheet application ignores column widths written anywhere else.");
+
+            var declared = columns.Elements<Column>().ToList();
+            Assert.AreEqual(2, declared.Count);
+
+            Assert.AreEqual(1u, declared[0].Min.Value);
+            Assert.AreEqual(1u, declared[0].Max.Value);
+            Assert.AreEqual(12d, declared[0].Width.Value, 0d);
+
+            Assert.AreEqual(2u, declared[1].Min.Value);
+            Assert.AreEqual(2u, declared[1].Max.Value);
+            Assert.AreEqual(40.5d, declared[1].Width.Value, 0d);
+
+            var children = worksheetPart.Worksheet.ChildElements.ToList();
+            var colsIndex = children.FindIndex(x => x is Columns);
+            var dataIndex = children.FindIndex(x => x is SheetData);
+            Assert.IsTrue(colsIndex >= 0 && colsIndex < dataIndex);
+        }
+
+        [TestMethod]
+        public void Generate_WithNoDeclaredColumnWidths_OmitsColsEntirely()
+        {
+            ConfigureRowPolicy(true, NoSplitMaxRows);
+
+            var result = DocGenerateParserHelper.Generate(new ExcelCollectionExportConfiguration
+            {
+                Configuration = new ExcelWriteConfiguration { LCID = 1048, SheetName = "NoWidths" },
+                DataCollection = BuildDataTempRecords(3)
+            });
+
+            if (!result.IsSuccess)
+                Assert.Fail($"Exporting a model without widths must succeed. Reported: {result.GetFirstMessage()}");
+
+            SaveForInspection(result.Response, "ColumnWidths_None");
+
+            using var ms = new MemoryStream(result.Response);
+            using var doc = SpreadsheetDocument.Open(ms, false);
+
+            var worksheetPart = doc.WorkbookPart.WorksheetParts.Single();
+            Assert.IsNull(worksheetPart.Worksheet.GetFirstChild<Columns>());
         }
     }
 }

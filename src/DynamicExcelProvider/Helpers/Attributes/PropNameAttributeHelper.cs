@@ -194,6 +194,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                             CultureInfo = x.CultureInfo,
                             FormatCode = x.FormatCode,
                             IsItalic = x.IsItalic,
+                            Width = x.Width,
                             IsBold = x.IsBold,
                             WrapText = x.WrapText
                         });
@@ -248,6 +249,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                                 Order = propAttribute?.Order ?? index,
                                 FormatCode = propAttribute.FormatCode,
                                 IsItalic = propAttribute.IsItalic,
+                                Width = propAttribute.Width,
                                 IsBold = propAttribute.IsBold,
                                 WrapText = propAttribute.WrapText
                             });
@@ -316,6 +318,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                             CultureInfo = x.CultureInfo,
                             FormatCode = x.FormatCode,
                             IsItalic = x.IsItalic,
+                            Width = x.Width,
                             IsBold = x.IsBold,
                             WrapText = x.WrapText
                         });
@@ -367,6 +370,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                                 Order = propAttribute?.Order ?? index,
                                 FormatCode = propAttribute.FormatCode,
                                 IsItalic = propAttribute.IsItalic,
+                                Width = propAttribute.Width,
                                 IsBold = propAttribute.IsBold,
                                 WrapText = propAttribute.WrapText
                             });

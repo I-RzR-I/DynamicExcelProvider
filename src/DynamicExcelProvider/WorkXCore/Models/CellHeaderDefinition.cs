@@ -152,5 +152,20 @@ namespace DynamicExcelProvider.WorkXCore.Models
         /// </value>
         /// =================================================================================================
         public CellDataDefinition CellData { get; set; }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Gets or sets the width of the column this header describes.
+        /// </summary>
+        /// <remarks>
+        ///     Measured in characters of the default font, which is how Excel itself expresses column width,
+        ///     not in pixels. Leave it <see langword="null" /> to let the spreadsheet application apply its
+        ///     own default width for that column.
+        /// </remarks>
+        /// <value>
+        ///     The column width, or <see langword="null" /> to use the default.
+        /// </value>
+        /// =================================================================================================
+        public double? Width { get; set; }
     }
 }

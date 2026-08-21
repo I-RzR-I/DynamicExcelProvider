@@ -119,5 +119,15 @@ namespace DynamicExcelProvider.Models.Internal
         /// </value>
         /// =================================================================================================
         public bool IsItalic { get; set; } = false;
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Gets or sets the width of the column, measured in characters of the default font.
+        /// </summary>
+        /// <value>
+        ///     The column width, or <see langword="null" /> to use the application default.
+        /// </value>
+        /// =================================================================================================
+        public double? Width { get; set; }
     }
 }

@@ -92,7 +92,8 @@ namespace DynamicExcelProvider.Helpers
                         Format = p.FormatCode,
                         IsItalic = p.IsItalic,
                         IsBold = p.IsBold,
-                        WrapText = p.WrapText
+                        WrapText = p.WrapText,
+                        Width = p.Width
                     });
                 }
 
@@ -162,7 +163,8 @@ namespace DynamicExcelProvider.Helpers
                         Format = p.FormatCode,
                         IsItalic = p.IsItalic,
                         IsBold = p.IsBold,
-                        WrapText = p.WrapText
+                        WrapText = p.WrapText,
+                        Width = p.Width
                     });
                 }
 
@@ -223,6 +225,7 @@ namespace DynamicExcelProvider.Helpers
                         IsItalic = x.IsItalic,
                         IsBold = x.IsBold,
                         WrapText = x.WrapText,
+                        Width = x.Width,
                         CellData = new CellDataDefinition
                         {
                             //CellDataType = DataTypeHelper.GetColumnType(embeddedModelCollection
@@ -327,6 +330,7 @@ namespace DynamicExcelProvider.Helpers
                         IsItalic = x.IsItalic,
                         IsBold = x.IsBold,
                         WrapText = x.WrapText,
+                        Width = x.Width,
                         CellData = new CellDataDefinition
                         {
                             CellDataType = DataTypeHelper.GetColumnType(eModelCollection[x.CommonName]),

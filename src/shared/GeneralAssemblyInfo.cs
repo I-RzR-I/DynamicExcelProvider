@@ -29,7 +29,7 @@ using System.Resources;
 
 [assembly: AssemblyCompany("RzR ®")]
 [assembly: AssemblyProduct("DynamicExcelProvider")]
-[assembly: AssemblyCopyright("Copyright © 2023-2025 RzR All rights reserved.")]
+[assembly: AssemblyCopyright("Copyright © 2023-2026 RzR All rights reserved.")]
 [assembly: AssemblyTrademark("® RzR™")]
 [assembly: AssemblyDescription("Export data to Excel format in an easier mode and with dynamic results.")]
 

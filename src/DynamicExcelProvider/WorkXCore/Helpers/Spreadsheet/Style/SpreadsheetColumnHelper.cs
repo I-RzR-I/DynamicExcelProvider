@@ -17,6 +17,9 @@
 #region U S A G E S
 
 using DocumentFormat.OpenXml.Spreadsheet;
+using DynamicExcelProvider.WorkXCore.Models;
+using RzR.Extensions.Domain.Primitives;
+using System.Collections.Generic;
 
 // ReSharper disable ArrangeObjectCreationWhenTypeEvident
 
@@ -48,12 +51,46 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Generates the columns width.
+        ///     Builds the column definitions for a worksheet from its header definitions.
         /// </summary>
+        /// <remarks>
+        ///     Only headers that declare a <see cref="CellHeaderDefinition.Width" /> produce a
+        ///     <see cref="Column" />; the rest are left out so the spreadsheet application applies its own
+        ///     default width. Returns <see langword="null" /> when no header declares a width, so the caller
+        ///     can omit the element entirely rather than emit an empty one.
+        ///     <para>
+        ///         The result belongs in the worksheet, immediately before its
+        ///         <see cref="DocumentFormat.OpenXml.Spreadsheet.SheetData" />. It is not a stylesheet element.
+        ///     </para>
+        /// </remarks>
+        /// <param name="columnHeadings">The header definitions of the worksheet, in column order.</param>
         /// <returns>
-        ///     The columns.
+        ///     The column definitions, or <see langword="null" /> when no width was declared.
         /// </returns>
         /// =================================================================================================
-        internal Column GenerateColumns() => new() { Width = 100, CustomWidth = true };
+        internal Columns GenerateColumns(IEnumerable<CellHeaderDefinition> columnHeadings)
+        {
+            if (columnHeadings.IsNull()) return null;
+
+            var columns = new Columns();
+            var index = 0u;
+
+            foreach (var heading in columnHeadings)
+            {
+                index++;
+
+                if (heading.IsNull() || heading.Width.HasValue.IsFalse()) continue;
+
+                columns.Append(new Column
+                {
+                    Min = index,
+                    Max = index,
+                    Width = heading.Width!.Value,
+                    CustomWidth = true
+                });
+            }
+
+            return columns.HasChildren ? columns : null;
+        }
     }
 }

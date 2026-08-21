@@ -53,9 +53,14 @@ namespace DynamicExcelProvider.Attributes
         /// <param name="wrapText">(Optional) True if wrap text, false if not.</param>
         /// <param name="isBold">(Optional) True if this object is bold, false if not.</param>
         /// <param name="isItalic">(Optional) True if this object is italic, false if not.</param>
+        /// <param name="width">
+        ///     (Optional) Column width, in characters of the default font. Zero, the default, leaves the
+        ///     column at the width the spreadsheet application chooses.
+        /// </param>
         /// =================================================================================================
-        public ExcelPropNameAttribute(string propertyName, int cultureInfoId, bool inResult, int order = 0, 
-            string formatCode = null, bool wrapText = false, bool isBold = false, bool isItalic = false)
+        public ExcelPropNameAttribute(string propertyName, int cultureInfoId, bool inResult, int order = 0,
+            string formatCode = null, bool wrapText = false, bool isBold = false, bool isItalic = false,
+            double width = 0)
         {
             PropertyName = propertyName;
             Lcid = cultureInfoId;
@@ -65,6 +70,7 @@ namespace DynamicExcelProvider.Attributes
             WrapText = wrapText;
             IsBold = isBold;
             IsItalic = isItalic;
+            Width = width > 0 ? (double?)width : null;
         }
 
         /// -------------------------------------------------------------------------------------------------
@@ -127,6 +133,18 @@ namespace DynamicExcelProvider.Attributes
         /// </value>
         /// =================================================================================================
         public int Lcid { get; set; }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Gets or sets the width of the column this property is exported into, measured in characters
+        ///     of the default font rather than pixels.
+        /// </summary>
+        /// <value>
+        ///     The column width, or <see langword="null" /> to let the spreadsheet application apply its
+        ///     own default.
+        /// </value>
+        /// =================================================================================================
+        public double? Width { get; set; }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>

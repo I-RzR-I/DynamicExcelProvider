@@ -134,8 +134,7 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
                         SpreadsheetFontHelper.Instance.GenerateFonts(),
                         SpreadsheetFillHelper.Instance.GenerateFills(),
                         SpreadsheetBorderHelper.Instance.GenerateBorders(),
-                        new SpreadsheetCellFormatHelper().GenerateCellFormats(GetAllSheetCellDefinitions(workBook.Worksheets)),
-                        SpreadsheetColumnHelper.Instance.GenerateColumns());
+                        new SpreadsheetCellFormatHelper().GenerateCellFormats(GetAllSheetCellDefinitions(workBook.Worksheets)));
 
                     // Save style sheet
                     stylePart.Stylesheet.Save();
@@ -151,7 +150,14 @@ namespace DynamicExcelProvider.WorkXCore.Helpers
                         // Add a WorksheetPart to the WorkbookPart.
                         var worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
                         var sheetData = new SheetData();
-                        worksheetPart.Worksheet = new Worksheet(sheetData);
+
+                        // Column definitions must precede the sheet data; a spreadsheet application
+                        // ignores them anywhere else. Omitted entirely when no header declares a width.
+                        var columns = SpreadsheetColumnHelper.Instance.GenerateColumns(worksheet.item.ColumnHeadings);
+
+                        worksheetPart.Worksheet = columns.IsNull()
+                            ? new Worksheet(sheetData)
+                            : new Worksheet(columns, sheetData);
 
                         var sheet = exDocument.AddWorksheet(workbookPart, worksheetPart, worksheet, sheetData);
 
