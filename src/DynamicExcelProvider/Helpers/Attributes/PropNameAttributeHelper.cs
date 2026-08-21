@@ -58,11 +58,13 @@ namespace DynamicExcelProvider.Helpers.Attributes
             {
                 var props = typeof(T).GetProperty(propertyName)
                     ?.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>();
-                if (props.IsNull()) return null;
+                
+                if (props.IsNull()) 
+                    return null;
 
                 resultList.AddRange(props!);
             }
-            catch { return null; }
+            catch { throw; }
 
             return resultList;
         }
@@ -86,12 +88,14 @@ namespace DynamicExcelProvider.Helpers.Attributes
             {
                 var props = typeof(T).GetProperty(propertyName)
                     ?.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>()
-                    .Where(x => Equals(x.CultureInfo, new CultureInfo(cultureId)));
-                if (props.IsNull()) return null;
+                    .Where(x => x.Lcid == cultureId);
+
+                if (props.IsNull()) 
+                    return null;
 
                 resultList.AddRange(props!);
             }
-            catch { return null; }
+            catch { throw; }
 
             return resultList;
         }
@@ -115,12 +119,14 @@ namespace DynamicExcelProvider.Helpers.Attributes
                 {
                     var props = propertyInfo
                         ?.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>();
-                    if (props.IsNull()) return null;
+                   
+                    if (props.IsNull())
+                        return null;
 
                     resultList.AddRange(props);
                 }
             }
-            catch { return null; }
+            catch { throw; }
 
             return resultList;
         }
@@ -145,13 +151,15 @@ namespace DynamicExcelProvider.Helpers.Attributes
                 {
                     var props = propertyInfo
                         ?.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>()
-                        .Where(x => Equals(x.CultureInfo, new CultureInfo(cultureId)));
-                    if (props.IsNull()) return null;
+                        .Where(x => x.Lcid == cultureId);
+                   
+                    if (props.IsNull())
+                        return null;
 
                     resultList.AddRange(props);
                 }
             }
-            catch { return null; }
+            catch { throw; }
 
             return resultList;
         }
@@ -176,7 +184,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                 {
                     var props = propertyInfo
                         ?.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>()
-                        .Where(x => Equals(x.CultureInfo, new CultureInfo(cultureId)))
+                        .Where(x => x.Lcid == cultureId)
                         .Select(x => new ParseModelProperty
                         {
                             EmbeddedName = propertyInfo.Name.IsNullOrEmpty() ? x.PropertyName : propertyInfo.Name,
@@ -189,12 +197,14 @@ namespace DynamicExcelProvider.Helpers.Attributes
                             IsBold = x.IsBold,
                             WrapText = x.WrapText
                         });
-                    if (props.IsNull()) return null;
+
+                    if (props.IsNull()) 
+                        return null;
 
                     resultList.AddRange(props);
                 }
             }
-            catch { return null; }
+            catch { throw; }
 
             return resultList;
         }
@@ -215,20 +225,23 @@ namespace DynamicExcelProvider.Helpers.Attributes
             var resultList = new List<ParseModelProperty>();
             try
             {
-                var hasAttributeByCulture = typeof(T).GetProperties().Any(x => x.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>()
-                    .Where(z => Equals(z.CultureInfo, new CultureInfo(cultureId))).ToList().Count > 0);
+                var hasAttributeByCulture = typeof(T).GetProperties()
+                    .Any(x => x.GetCustomAttributes(typeof(ExcelPropNameAttribute), false)
+                        .Cast<ExcelPropNameAttribute>()
+                    .Where(z => z.Lcid == cultureId).ToList().Count > 0);
                 foreach (var (item, index) in typeof(T).GetProperties().WithIndex())
                 {
-                    var propAttributes = item.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>().ToList();
+                    var propAttributes = item.GetCustomAttributes(typeof(ExcelPropNameAttribute), false)
+                        .Cast<ExcelPropNameAttribute>().ToList();
                     if (propAttributes.IsNullOrEmptyEnumerable().IsFalse())
                     {
-                        var existAttributeWithCulture = propAttributes.Any(x => Equals(x.CultureInfo, new CultureInfo(cultureId)));
+                        var existAttributeWithCulture = propAttributes.Any(x => x.Lcid == cultureId);
                         if (existAttributeWithCulture.IsTrue())
                         {
-                            var propAttribute = propAttributes.FirstOrDefault(x => Equals(x.CultureInfo, new CultureInfo(cultureId)));
+                            var propAttribute = propAttributes.FirstOrDefault(x => x.Lcid == cultureId);
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = new CultureInfo(cultureId),
+                                CultureInfo = SafeCulture(cultureId),
                                 CurrentName = propAttribute!.PropertyName.IsNullOrEmpty() ? item.Name : propAttribute?.PropertyName,
                                 InResult = propAttribute?.InResult ?? true,
                                 EmbeddedName = item.Name,
@@ -243,7 +256,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                         {
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = new CultureInfo(cultureId),
+                                CultureInfo = SafeCulture(cultureId),
                                 CurrentName = item.Name,
                                 InResult = true,
                                 EmbeddedName = item.Name,
@@ -258,7 +271,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                         {
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = new CultureInfo(cultureId),
+                                CultureInfo = SafeCulture(cultureId),
                                 CurrentName = item.Name,
                                 InResult = true,
                                 EmbeddedName = item.Name,
@@ -268,7 +281,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                     }
                 }
             }
-            catch { return null; }
+            catch { throw; }
 
             return resultList;
         }
@@ -293,7 +306,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                 {
                     var props = propertyInfo
                         ?.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>()
-                        .Where(x => Equals(x.CultureInfo, new CultureInfo(cultureId)))
+                        .Where(x => x.Lcid == cultureId)
                         .Select(x => new ParseModelProperty
                         {
                             EmbeddedName = propertyInfo.Name.IsNullOrEmpty() ? x.PropertyName : propertyInfo.Name,
@@ -306,12 +319,14 @@ namespace DynamicExcelProvider.Helpers.Attributes
                             IsBold = x.IsBold,
                             WrapText = x.WrapText
                         });
-                    if (props.IsNull()) return null;
+
+                    if (props.IsNull()) 
+                        return null;
 
                     resultList.AddRange(props);
                 }
             }
-            catch { return null; }
+            catch { throw; }
 
             return resultList;
         }
@@ -333,19 +348,19 @@ namespace DynamicExcelProvider.Helpers.Attributes
             try
             {
                 var hasAttributeByCulture = type.GetProperties().Any(x => x.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>()
-                    .Where(z => Equals(z.CultureInfo, new CultureInfo(cultureId))).ToList().Count > 0);
+                    .Where(z => z.Lcid == cultureId).ToList().Count > 0);
                 foreach (var (item, index) in type.GetProperties().WithIndex())
                 {
                     var propAttributes = item.GetCustomAttributes(typeof(ExcelPropNameAttribute), false).Cast<ExcelPropNameAttribute>().ToList();
                     if (propAttributes.IsNullOrEmptyEnumerable().IsFalse())
                     {
-                        var existAttributeWithCulture = propAttributes.Any(x => Equals(x.CultureInfo, new CultureInfo(cultureId)));
+                        var existAttributeWithCulture = propAttributes.Any(x => x.Lcid == cultureId);
                         if (existAttributeWithCulture.IsTrue())
                         {
-                            var propAttribute = propAttributes.FirstOrDefault(x => Equals(x.CultureInfo, new CultureInfo(cultureId)));
+                            var propAttribute = propAttributes.FirstOrDefault(x => x.Lcid == cultureId);
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = new CultureInfo(cultureId),
+                                CultureInfo = SafeCulture(cultureId),
                                 CurrentName = propAttribute!.PropertyName.IsNullOrEmpty() ? item.Name : propAttribute.PropertyName,
                                 InResult = propAttribute.InResult,
                                 EmbeddedName = item.Name,
@@ -360,7 +375,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                         {
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = new CultureInfo(cultureId),
+                                CultureInfo = SafeCulture(cultureId),
                                 CurrentName = item.Name,
                                 InResult = true,
                                 EmbeddedName = item.Name,
@@ -375,7 +390,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                         {
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = new CultureInfo(cultureId),
+                                CultureInfo = SafeCulture(cultureId),
                                 CurrentName = item.Name,
                                 InResult = true,
                                 EmbeddedName = item.Name,
@@ -385,9 +400,40 @@ namespace DynamicExcelProvider.Helpers.Attributes
                     }
                 }
             }
-            catch { return null; }
+            catch { throw; }
 
             return resultList;
+        }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Resolves an LCID to a culture without ever throwing.
+        /// </summary>
+        /// <remarks>
+        ///     Culture matching is done on the raw LCID, so this is only used to populate the informational
+        ///     <see cref="ParseModelProperty.CultureInfo" />. An identifier that cannot be resolved on the
+        ///     current runtime - reserved values such as 0 or 4096, or any identifier at all under
+        ///     globalization-invariant mode - yields the invariant culture instead of failing the export.
+        /// </remarks>
+        /// <param name="lcid">The culture identifier.</param>
+        /// <returns>
+        ///     The resolved culture, or <see cref="CultureInfo.InvariantCulture" />.
+        /// </returns>
+        /// =================================================================================================
+        private static CultureInfo SafeCulture(int lcid)
+        {
+            try
+            {
+                return CultureInfo.GetCultureInfo(lcid);
+            }
+            catch (CultureNotFoundException)
+            {
+                return CultureInfo.InvariantCulture;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return CultureInfo.InvariantCulture;
+            }
         }
     }
 }

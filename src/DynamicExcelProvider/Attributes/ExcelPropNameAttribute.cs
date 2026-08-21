@@ -16,6 +16,7 @@
 
 #region U S A G E S
 
+using RzR.Extensions.Domain.Primitives;
 using System;
 using System.Globalization;
 
@@ -57,7 +58,7 @@ namespace DynamicExcelProvider.Attributes
             string formatCode = null, bool wrapText = false, bool isBold = false, bool isItalic = false)
         {
             PropertyName = propertyName;
-            CultureInfo = new CultureInfo(cultureInfoId);
+            Lcid = cultureInfoId;
             Order = order;
             InResult = inResult;
             FormatCode = formatCode;
@@ -83,7 +84,7 @@ namespace DynamicExcelProvider.Attributes
             bool isBold = false, bool isItalic = false)
         {
             PropertyName = propertyName;
-            CultureInfo = new CultureInfo(cultureInfoId);
+            Lcid = cultureInfoId;
             Order = 0;
             InResult = false;
             WrapText = wrapText;
@@ -112,13 +113,64 @@ namespace DynamicExcelProvider.Attributes
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
-        ///     Gets localization culture.
+        ///     Gets the localization culture identifier (LCID) exactly as it was declared.
         /// </summary>
+        /// <remarks>
+        ///     This is the value culture matching is performed on. It is stored as the raw integer and is
+        ///     never converted to a <see cref="System.Globalization.CultureInfo" /> during attribute
+        ///     construction, because an attribute constructor runs whenever anything reflects over the
+        ///     annotated type - Swagger generation, serializers, model binders - and constructing a culture
+        ///     there throws under globalization-invariant mode, taking the unrelated caller down with it.
+        /// </remarks>
+        /// <value>
+        ///     The culture identifier.
+        /// </value>
+        /// =================================================================================================
+        public int Lcid { get; set; }
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
+        ///     Gets the localization culture resolved from <see cref="Lcid" />, or
+        ///     <see cref="System.Globalization.CultureInfo.InvariantCulture" /> when the identifier cannot be
+        ///     resolved on the current runtime.
+        /// </summary>
+        /// <remarks>
+        ///     Resolved on demand and never during construction. Returns the invariant culture rather than
+        ///     throwing, so that reflecting over an annotated type is always safe.
+        /// </remarks>
         /// <value>
         ///     Information describing the culture.
         /// </value>
         /// =================================================================================================
-        public CultureInfo CultureInfo { get; set; }
+        public CultureInfo CultureInfo
+        {
+            get
+            {
+                if (_cultureInfo.IsNotNull()) 
+                    return _cultureInfo;
+
+                try
+                {
+                    _cultureInfo = CultureInfo.GetCultureInfo(Lcid);
+                }
+                catch (CultureNotFoundException)
+                {
+                    _cultureInfo = CultureInfo.InvariantCulture;
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    _cultureInfo = CultureInfo.InvariantCulture;
+                }
+
+                return _cultureInfo;
+            }
+            set => _cultureInfo = value;
+        }
+
+        /// <summary>
+        ///     Backing field for <see cref="CultureInfo" />, resolved lazily.
+        /// </summary>
+        private CultureInfo _cultureInfo;
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
