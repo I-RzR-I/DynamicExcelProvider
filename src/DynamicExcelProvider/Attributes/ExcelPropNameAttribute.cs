@@ -70,7 +70,7 @@ namespace DynamicExcelProvider.Attributes
             WrapText = wrapText;
             IsBold = isBold;
             IsItalic = isItalic;
-            Width = width > 0 ? (double?)width : null;
+            Width = width;
         }
 
         /// -------------------------------------------------------------------------------------------------
@@ -140,11 +140,10 @@ namespace DynamicExcelProvider.Attributes
         ///     of the default font rather than pixels.
         /// </summary>
         /// <value>
-        ///     The column width, or <see langword="null" /> to let the spreadsheet application apply its
-        ///     own default.
+        ///     The column width. Zero, the default, lets the spreadsheet application apply its own.
         /// </value>
         /// =================================================================================================
-        public double? Width { get; set; }
+        public double Width { get; set; }
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>

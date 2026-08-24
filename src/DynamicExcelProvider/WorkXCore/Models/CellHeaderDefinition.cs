@@ -159,13 +159,15 @@ namespace DynamicExcelProvider.WorkXCore.Models
         /// </summary>
         /// <remarks>
         ///     Measured in characters of the default font, which is how Excel itself expresses column width,
-        ///     not in pixels. Leave it <see langword="null" /> to let the spreadsheet application apply its
-        ///     own default width for that column.
+        ///     not in pixels. Leave it at zero, the default, to let the spreadsheet application choose the
+        ///     width for that column. Zero and negative values are not written out at all: a zero width
+        ///     would render the column invisible without marking it hidden, which the reader could not undo.
+        ///     Anything above 255, Excel's maximum, is clamped.
         /// </remarks>
         /// <value>
-        ///     The column width, or <see langword="null" /> to use the default.
+        ///     The column width. Zero, the default, uses the application default.
         /// </value>
         /// =================================================================================================
-        public double? Width { get; set; }
+        public double Width { get; set; }
     }
 }

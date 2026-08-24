@@ -51,6 +51,14 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
 
         /// -------------------------------------------------------------------------------------------------
         /// <summary>
+        ///     (Immutable) The widest column Excel accepts, in characters of the default font. Anything
+        ///     larger is clamped to this rather than written out, which also caps infinity.
+        /// </summary>
+        /// =================================================================================================
+        private const double MaxColumnWidth = 255d;
+
+        /// -------------------------------------------------------------------------------------------------
+        /// <summary>
         ///     Builds the column definitions for a worksheet from its header definitions.
         /// </summary>
         /// <remarks>
@@ -79,13 +87,13 @@ namespace DynamicExcelProvider.WorkXCore.Helpers.Spreadsheet.Style
             {
                 index++;
 
-                if (heading.IsNull() || heading.Width.HasValue.IsFalse()) continue;
+                if (heading.IsNull() || (heading.Width > 0).IsFalse()) continue;
 
                 columns.Append(new Column
                 {
                     Min = index,
                     Max = index,
-                    Width = heading.Width!.Value,
+                    Width = heading.Width > MaxColumnWidth ? MaxColumnWidth : heading.Width,
                     CustomWidth = true
                 });
             }

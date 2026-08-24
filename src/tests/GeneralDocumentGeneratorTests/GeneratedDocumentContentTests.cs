@@ -5,6 +5,8 @@ using DynamicExcelProvider.Helpers;
 using DynamicExcelProvider.Models.Request.Configuration;
 using DynamicExcelProvider.Models.Request.Configuration.Property;
 using DynamicExcelProvider.Models.Request.Export;
+using DynamicExcelProvider.WorkXCore.Enums;
+using DynamicExcelProvider.WorkXCore.Models;
 using GeneralDocumentGeneratorTests.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -848,5 +850,89 @@ namespace GeneralDocumentGeneratorTests
             var worksheetPart = doc.WorkbookPart.WorksheetParts.Single();
             Assert.IsNull(worksheetPart.Worksheet.GetFirstChild<Columns>());
         }
+        public class DegenerateWidthModel
+        {
+            [ExcelPropName("Zero", 1033, inResult: true, order: 0, width: 0)]
+            public int Zero { get; set; }
+
+            [ExcelPropName("Negative", 1033, inResult: true, order: 1, width: -5)]
+            public int Negative { get; set; }
+
+            [ExcelPropName("Oversized", 1033, inResult: true, order: 2, width: 300)]
+            public int Oversized { get; set; }
+        }
+
+        [TestMethod]
+        public void Generate_WithZeroOrNegativeWidths_OmitsThoseColumnsInsteadOfHidingThem()
+        {
+            ConfigureRowPolicy(true, NoSplitMaxRows);
+
+            var result = DocGenerateParserHelper.Generate(new ExcelCollectionExportConfiguration
+            {
+                Configuration = new ExcelWriteConfiguration { LCID = 1033, SheetName = "Degenerate" },
+                DataCollection = new List<DegenerateWidthModel>
+                {
+                    new DegenerateWidthModel { Zero = 1, Negative = 2, Oversized = 3 }
+                }
+            });
+
+            if (!result.IsSuccess)
+                Assert.Fail($"A degenerate width must not fail the export. Reported: {result.GetFirstMessage()}");
+
+            SaveForInspection(result.Response, "ColumnWidths_Degenerate");
+
+            using var ms = new MemoryStream(result.Response);
+            using var doc = SpreadsheetDocument.Open(ms, false);
+
+            var columns = doc.WorkbookPart.WorksheetParts.Single().Worksheet.GetFirstChild<Columns>();
+            if (columns == null)
+                Assert.Fail("The oversized column still declares a width, so <cols> must be present.");
+
+            var declared = columns.Elements<Column>().ToList();
+
+            Assert.AreEqual(1, declared.Count);
+            Assert.AreEqual(3u, declared[0].Min.Value);
+            Assert.AreEqual(255d, declared[0].Width.Value, 0d);
+        }
+
+        [TestMethod]
+        public void GenerateTemplate_WithNaNWidth_OmitsTheColumnRatherThanWritingNaN()
+        {
+            ConfigureRowPolicy(true, NoSplitMaxRows);
+
+            using var stream = new MemoryStream();
+
+            var result = DocGenerateParserHelper.GenerateTemplate(stream, new ExcelTemplateWriteConfiguration
+            {
+                SheetName = "NaNWidth",
+                ColumnHeadings = new List<CellHeaderDefinition>
+                {
+                    new CellHeaderDefinition("Broken", true, false,
+                        new CellDataDefinition(CellDataType.String, SourceCellDataType.String)) { Width = double.NaN },
+                    new CellHeaderDefinition("Fine", true, false,
+                        new CellDataDefinition(CellDataType.String, SourceCellDataType.String)) { Width = 20 }
+                }
+            });
+
+            if (!result.IsSuccess)
+                Assert.Fail($"A NaN width must not fail the export. Reported: {result.GetFirstMessage()}");
+
+            var bytes = stream.ToArray();
+            SaveForInspection(bytes, "ColumnWidths_NaN");
+
+            using var read = new MemoryStream(bytes);
+            using var doc = SpreadsheetDocument.Open(read, false);
+
+            var columns = doc.WorkbookPart.WorksheetParts.Single().Worksheet.GetFirstChild<Columns>();
+            if (columns == null)
+                Assert.Fail("The second column declares a valid width, so <cols> must be present.");
+
+            var declared = columns.Elements<Column>().ToList();
+
+            Assert.AreEqual(1, declared.Count);
+            Assert.AreEqual(2u, declared[0].Min.Value);
+            Assert.AreEqual(20d, declared[0].Width.Value, 0d);
+        }
+
     }
 }
