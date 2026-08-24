@@ -242,7 +242,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                             var propAttribute = propAttributes.FirstOrDefault(x => x.Lcid == cultureId);
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = SafeCulture(cultureId),
+                                CultureInfo = CultureHelper.SafeFromLcid(cultureId),
                                 CurrentName = propAttribute!.PropertyName.IsNullOrEmpty() ? item.Name : propAttribute?.PropertyName,
                                 InResult = propAttribute?.InResult ?? true,
                                 EmbeddedName = item.Name,
@@ -258,7 +258,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                         {
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = SafeCulture(cultureId),
+                                CultureInfo = CultureHelper.SafeFromLcid(cultureId),
                                 CurrentName = item.Name,
                                 InResult = true,
                                 EmbeddedName = item.Name,
@@ -273,7 +273,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                         {
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = SafeCulture(cultureId),
+                                CultureInfo = CultureHelper.SafeFromLcid(cultureId),
                                 CurrentName = item.Name,
                                 InResult = true,
                                 EmbeddedName = item.Name,
@@ -363,7 +363,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                             var propAttribute = propAttributes.FirstOrDefault(x => x.Lcid == cultureId);
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = SafeCulture(cultureId),
+                                CultureInfo = CultureHelper.SafeFromLcid(cultureId),
                                 CurrentName = propAttribute!.PropertyName.IsNullOrEmpty() ? item.Name : propAttribute.PropertyName,
                                 InResult = propAttribute.InResult,
                                 EmbeddedName = item.Name,
@@ -379,7 +379,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                         {
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = SafeCulture(cultureId),
+                                CultureInfo = CultureHelper.SafeFromLcid(cultureId),
                                 CurrentName = item.Name,
                                 InResult = true,
                                 EmbeddedName = item.Name,
@@ -394,7 +394,7 @@ namespace DynamicExcelProvider.Helpers.Attributes
                         {
                             resultList.Add(new ParseModelProperty()
                             {
-                                CultureInfo = SafeCulture(cultureId),
+                                CultureInfo = CultureHelper.SafeFromLcid(cultureId),
                                 CurrentName = item.Name,
                                 InResult = true,
                                 EmbeddedName = item.Name,
@@ -407,37 +407,6 @@ namespace DynamicExcelProvider.Helpers.Attributes
             catch { throw; }
 
             return resultList;
-        }
-
-        /// -------------------------------------------------------------------------------------------------
-        /// <summary>
-        ///     Resolves an LCID to a culture without ever throwing.
-        /// </summary>
-        /// <remarks>
-        ///     Culture matching is done on the raw LCID, so this is only used to populate the informational
-        ///     <see cref="ParseModelProperty.CultureInfo" />. An identifier that cannot be resolved on the
-        ///     current runtime - reserved values such as 0 or 4096, or any identifier at all under
-        ///     globalization-invariant mode - yields the invariant culture instead of failing the export.
-        /// </remarks>
-        /// <param name="lcid">The culture identifier.</param>
-        /// <returns>
-        ///     The resolved culture, or <see cref="CultureInfo.InvariantCulture" />.
-        /// </returns>
-        /// =================================================================================================
-        private static CultureInfo SafeCulture(int lcid)
-        {
-            try
-            {
-                return CultureInfo.GetCultureInfo(lcid);
-            }
-            catch (CultureNotFoundException)
-            {
-                return CultureInfo.InvariantCulture;
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return CultureInfo.InvariantCulture;
-            }
         }
     }
 }

@@ -1,3 +1,8 @@
+### **v4.0.0.7503** [[RzR](mailto:108324929+I-RzR-I@users.noreply.github.com)] 24-08-2026
+* [21eda48] (RzR) -> Auto commit uncommited files
+* [de8bf11] (RzR) -> Apply fix for globalization culture.
+* [0111806] (RzR) -> Change the `Width` data type to nonullable double.
+
 ### **v3.0.0.7667** [[RzR](mailto:108324929+I-RzR-I@users.noreply.github.com)] 21-08-2026
 * [c156822] (RzR) -> Auto commit uncommited files
 * [9352925] (RzR) -> Add configurable column width and emit it into the worksheet.

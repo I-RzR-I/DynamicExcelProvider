@@ -47,12 +47,12 @@ namespace DynamicExcelProvider.Helpers
         /// =================================================================================================
         internal static Type GetColumnType(string type, bool isNullable = false)
         {
-            type = type.StartsWith("System.")
+            type = type.StartsWith("System.", StringComparison.Ordinal)
                 ? type.Replace("System.", "")
                 : type;
 
             Type columnType;
-            switch (type.ToLower())
+            switch (type.ToLowerInvariant())
             {
                 case "tinyint":
                 case "smallint":
@@ -120,12 +120,12 @@ namespace DynamicExcelProvider.Helpers
         /// =================================================================================================
         internal static CellDataType GetColumnType(string type)
         {
-            type = type.StartsWith("System.")
+            type = type.StartsWith("System.", StringComparison.Ordinal)
                 ? type.Replace("System.", "")
                 : type;
 
             var columnType = CellDataType.String;
-            switch (type.ToLower())
+            switch (type.ToLowerInvariant())
             {
                 case "tinyint":
                 case "smallint":
@@ -178,12 +178,12 @@ namespace DynamicExcelProvider.Helpers
         /// =================================================================================================
         internal static SourceCellDataType GetSourceColumnType(string type)
         {
-            type = type.StartsWith("System.")
+            type = type.StartsWith("System.", StringComparison.Ordinal)
                 ? type.Replace("System.", "")
                 : type;
 
             var columnType = SourceCellDataType.String;
-            switch (type.ToLower())
+            switch (type.ToLowerInvariant())
             {
                 case "tinyint":
                 case "smallint":

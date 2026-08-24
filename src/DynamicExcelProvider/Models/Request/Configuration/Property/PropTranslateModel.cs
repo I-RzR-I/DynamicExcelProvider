@@ -98,9 +98,9 @@ namespace DynamicExcelProvider.Models.Request.Configuration.Property
         ///     Gets or sets the width of the column, measured in characters of the default font.
         /// </summary>
         /// <value>
-        ///     The column width, or <see langword="null" /> to use the application default.
+        ///     The column width. Zero, the default, leaves the column at the application default.
         /// </value>
         /// =================================================================================================
-        public double? Width { get; set; }
+        public double Width { get; set; }
     }
 }
