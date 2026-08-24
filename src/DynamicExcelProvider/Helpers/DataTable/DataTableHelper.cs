@@ -84,7 +84,7 @@ namespace DynamicExcelProvider.Helpers.DataTable
                 ? new System.Data.DataTable()
                 : new System.Data.DataTable(tableName);
 
-            table.Locale = new CultureInfo(cultureId.IsNull() ? 1033 : cultureId.Value!);
+            table.Locale = CultureHelper.SafeFromLcid(cultureId.IsNull() ? 1033 : cultureId.Value!);
 
             foreach (var col in _availablePropInOutput.OrderBy(x => x.Order))
             {
@@ -121,7 +121,7 @@ namespace DynamicExcelProvider.Helpers.DataTable
                     else
                     {
                         var dataType = DataTypeHelper.GetColumnType(columnInfo!.DataType, columnInfo.IsNullable);
-                        row[idx] = Convert.ChangeType(data, dataType);
+                        row[idx] = Convert.ChangeType(data, dataType, CultureInfo.InvariantCulture);
                     }
 
                     idx++;
@@ -156,7 +156,7 @@ namespace DynamicExcelProvider.Helpers.DataTable
                 {
                     var propValue = dataProp!.GetGetMethod(true).Invoke(record, new object[] { });
 
-                    var convertedData = Convert.ChangeType(propValue, dataType);
+                    var convertedData = Convert.ChangeType(propValue, dataType, CultureInfo.InvariantCulture);
                     row[idx] = convertedData;
                     idx++;
                 }
@@ -190,7 +190,7 @@ namespace DynamicExcelProvider.Helpers.DataTable
                 {
                     var propValue = dataProp!.GetGetMethod(true).Invoke(record, new object[] { });
 
-                    var convertedData = Convert.ChangeType(propValue, dataType);
+                    var convertedData = Convert.ChangeType(propValue, dataType, CultureInfo.InvariantCulture);
                     row[idx] = convertedData;
                     idx++;
                 }
@@ -224,7 +224,7 @@ namespace DynamicExcelProvider.Helpers.DataTable
                 {
                     var propValue = dataProp!.GetGetMethod(true).Invoke(record, new object[] { });
 
-                    var convertedData = Convert.ChangeType(propValue, dataType);
+                    var convertedData = Convert.ChangeType(propValue, dataType, CultureInfo.InvariantCulture);
                     row[idx] = convertedData;
                     idx++;
                 }
