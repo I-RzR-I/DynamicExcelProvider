@@ -1,3 +1,7 @@
+### **v4.1.0.8574** [[RzR](mailto:108324929+I-RzR-I@users.noreply.github.com)] 17-10-2026
+* [129cad8] (RzR) -> Auto commit uncommited files
+* [8dce3dc] (RzR) -> Update the reference packages version.
+
 ### **v4.0.0.7503** [[RzR](mailto:108324929+I-RzR-I@users.noreply.github.com)] 24-08-2026
 * [21eda48] (RzR) -> Auto commit uncommited files
 * [de8bf11] (RzR) -> Apply fix for globalization culture.
